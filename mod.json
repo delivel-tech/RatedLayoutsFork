@@ -1,0 +1,14 @@
+{
+	"geode": "4.9.0",
+	"gd": {
+		"win": "2.2074",
+		"android": "2.2074",
+		"mac": "2.2074",
+		"ios": "2.2074"
+	},
+	"id": "arcticwoof.rated_layouts",
+	"name": "Rated Layouts",
+	"version": "v1.0.0",
+	"developer": "ArcticWoof",
+	"description": "Play rated layout levels and earn blueprint stars"
+}
