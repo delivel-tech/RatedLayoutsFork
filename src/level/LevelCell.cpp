@@ -157,11 +157,24 @@ class $modify(LevelCell)
             auto coinContainer = cellRef->m_mainLayer->getChildByID("difficulty-container");
             if (coinContainer && !cellRef->m_compactView)
             {
-                auto coinIcon = coinContainer->getChildByID("coin-icon-1");
-                if (coinIcon)
+                auto coinIcon1 = coinContainer->getChildByID("coin-icon-1");
+                auto coinIcon2 = coinContainer->getChildByID("coin-icon-2");
+                auto coinIcon3 = coinContainer->getChildByID("coin-icon-3");
+                if (coinIcon1 || coinIcon2 || coinIcon3)
                 {
                     difficultySprite->setPositionY(difficultySprite->getPositionY() + 10);
                 }
+                // doing the dumb coin move
+                if (coinIcon1) {
+                    coinIcon1->setPositionY(coinIcon1->getPositionY() - 5);
+                }
+                if (coinIcon2) {
+                    coinIcon2->setPositionY(coinIcon2->getPositionY() - 5);
+                }
+                if (coinIcon3) {
+                    coinIcon3->setPositionY(coinIcon3->getPositionY() - 5);
+                }
+                // 
             } });
     }
 
