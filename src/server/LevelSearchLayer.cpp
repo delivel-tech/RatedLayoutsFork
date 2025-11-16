@@ -47,16 +47,16 @@ class $modify(RLLevelSearchLayer, LevelSearchLayer)
             auto oldSprite = typeinfo_cast<CCSprite *>(buttonSprite->getChildren()->objectAtIndex(1));
             if (oldSprite)
             {
-                auto newSprite = CCSprite::create("rlStarIcon.png"_spr);
+                auto newSprite = CCSprite::create("rlBadgeMod.png"_spr);
                 oldSprite->setVisible(false);
                 newSprite->setPosition(oldSprite->getPosition());
-                newSprite->setScale(0.8f);
+                newSprite->setScale(0.6f);
                 buttonSprite->addChild(newSprite);
             }
             auto oldSprite2 = typeinfo_cast<CCSprite *>(ratedButtonSprite->getChildren()->objectAtIndex(1));
             if (oldSprite2)
             {
-                auto newSprite = CCSprite::create("rlStarIcon.png"_spr);
+                auto newSprite = CCSprite::create("rlhammerIcon.png"_spr);
                 oldSprite2->setVisible(false);
                 newSprite->setPosition(oldSprite2->getPosition());
                 newSprite->setScale(0.8f);

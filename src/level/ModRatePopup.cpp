@@ -204,7 +204,6 @@ void ModRatePopup::onSubmitButton(CCObject *sender)
 
     log::info("Sending request: {}", jsonBody.dump());
 
-    // Make HTTP request using geode's web request
     auto postReq = web::WebRequest();
     postReq.bodyJSON(jsonBody);
     auto postTask = postReq.post("https://gdrate.arcticwoof.xyz/rate");
@@ -267,7 +266,6 @@ void ModRatePopup::onUnrateButton(CCObject *sender)
 
     log::info("Sending unrate request: {}", jsonBody.dump());
 
-    // Make HTTP request using geode's web request
     auto postReq = web::WebRequest();
     postReq.bodyJSON(jsonBody);
     auto postTask = postReq.post("https://gdrate.arcticwoof.xyz/unrate");
@@ -313,7 +311,6 @@ void ModRatePopup::onToggleFeatured(CCObject *sender)
     int userRole = Mod::get()->getSavedValue<int>("role", 0);
 
     m_isFeatured = !m_isFeatured;
-    log::info("Featured mode: {}", m_isFeatured);
 
     auto existingCoin = m_difficultyContainer->getChildByID("featured-coin");
     if (existingCoin)
@@ -343,7 +340,6 @@ void ModRatePopup::onToggleFeatured(CCObject *sender)
 void ModRatePopup::onToggleDemon(CCObject *sender)
 {
     m_isDemonMode = !m_isDemonMode;
-    log::info("Demon mode: {}", m_isDemonMode);
 
     m_normalButtonsContainer->setVisible(!m_isDemonMode);
     m_demonButtonsContainer->setVisible(m_isDemonMode);
@@ -383,7 +379,6 @@ void ModRatePopup::onRatingButton(CCObject *sender)
 
     m_selectedRating = button->getTag();
 
-    log::info("Rating button clicked: {}", rating);
     updateDifficultySprite(rating);
 }
 
