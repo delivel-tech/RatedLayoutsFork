@@ -23,5 +23,17 @@
 			"importance": "required",
 			"version": ">=1.0.1"
 		}
-	}
+	},
+	"links": {
+		"source": "https://github.com/DumbCaveSpider/RatedLayouts",
+		"homepage": "https://arcticwoof.com.au/",
+		"community": "https://discord.gg/gXcppxTNxC"
+	},
+	"tags": [
+		"content",
+		"online",
+		"interface",
+		"enhancement",
+		"gameplay"
+	]
 }

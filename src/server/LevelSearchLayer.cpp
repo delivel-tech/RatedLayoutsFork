@@ -36,6 +36,13 @@ class $modify(RLLevelSearchLayer, LevelSearchLayer)
                 menu_selector(RLLevelSearchLayer::onRatedLevelsButton));
             quickSearchMenu->addChild(ratedTabButton);
 
+            auto allRatedButtonSprite = SearchButton::create("GJ_longBtn04_001.png", "All Rated", 0.5f, "GJ_sFollowedIcon_001.png");
+            auto allRatedTabButton = CCMenuItemSpriteExtra::create(
+                allRatedButtonSprite,
+                this,
+                menu_selector(RLLevelSearchLayer::onAllRatedLevelsButton));
+            quickSearchMenu->addChild(allRatedTabButton);
+
             // hacky way to use custom icons (inspired by random tab snippet lol)
             auto oldSprite = typeinfo_cast<CCSprite *>(buttonSprite->getChildren()->objectAtIndex(1));
             if (oldSprite)
@@ -54,6 +61,15 @@ class $modify(RLLevelSearchLayer, LevelSearchLayer)
                 newSprite->setPosition(oldSprite2->getPosition());
                 newSprite->setScale(0.8f);
                 ratedButtonSprite->addChild(newSprite);
+            }
+            auto oldSprite3 = typeinfo_cast<CCSprite *>(allRatedButtonSprite->getChildren()->objectAtIndex(1));
+            if (oldSprite3)
+            {
+                auto newSprite = CCSprite::create("rlStarIcon.png"_spr);
+                oldSprite3->setVisible(false);
+                newSprite->setPosition(oldSprite3->getPosition());
+                newSprite->setScale(0.8f);
+                allRatedButtonSprite->addChild(newSprite);
             }
 
             quickSearchMenu->updateLayout();
@@ -119,6 +135,56 @@ class $modify(RLLevelSearchLayer, LevelSearchLayer)
 
         web::WebRequest()
             .param("type", 0)
+            .param("amount", 1000)
+            .get("https://gdrate.arcticwoof.xyz/getLevels")
+            .listen([this](web::WebResponse *res)
+                    {
+                if (res && res->ok()) {
+                    auto jsonResult = res->json();
+                    
+                    if (jsonResult) {
+                        auto json = jsonResult.unwrap();
+                        std::string levelIDs;
+                        bool first = true;
+
+                        if (json.contains("levelIds")) {
+                            auto levelsArr = json["levelIds"];
+                            
+                            // iterate
+                            for (auto levelIDValue : levelsArr) {
+                                auto levelID = levelIDValue.as<int>();
+                                if (levelID) {
+                                    if (!first) levelIDs += ",";
+                                    levelIDs += numToString(levelID.unwrap());
+                                    first = false;
+                                }
+                            }
+                        }
+
+                        if (!levelIDs.empty()) {
+                            auto searchObject = GJSearchObject::create(SearchType::Type19, levelIDs);
+                            auto browserLayer = LevelBrowserLayer::create(searchObject);
+                            auto scene = CCScene::create();
+                            scene->addChild(browserLayer);
+                            auto transitionFade = CCTransitionFade::create(0.5f, scene);
+                            CCDirector::sharedDirector()->pushScene(transitionFade);
+                        } else {
+                            log::warn("No levels found in response");
+                        }
+                    } else {
+                        log::error("Failed to parse response JSON");
+                    }
+                } else {
+                    log::error("Failed to fetch levels from server");
+                } });
+    }
+
+    void onAllRatedLevelsButton(CCObject *sender)
+    {
+        m_fields->m_webTask.cancel();
+
+        web::WebRequest()
+            .param("type", 2)
             .param("amount", 1000)
             .get("https://gdrate.arcticwoof.xyz/getLevels")
             .listen([this](web::WebResponse *res)
