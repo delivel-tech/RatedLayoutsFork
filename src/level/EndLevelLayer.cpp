@@ -5,7 +5,7 @@ using namespace geode::prelude;
 
 class $modify(EndLevelLayer)
 {
-    void customSetup()
+    void customSetup() override
     {
         EndLevelLayer::customSetup(); // call original method cuz if not then it breaks lol
         auto playLayer = PlayLayer::get();
@@ -17,6 +17,18 @@ class $modify(EndLevelLayer)
         {
             return;
         }
+
+
+        // i couldve done a better way to do this but this works for now
+        std::string completedKey = fmt::format("{}", level->m_levelID);
+        if (Mod::get()->getSavedValue<bool>(completedKey, false))
+        {
+            log::info("Level ID: {} was already completed before", level->m_levelID);
+            return;
+        }
+
+        // level completed yipeee
+        Mod::get()->setSavedValue<bool>(completedKey, true);
 
         // Fetch rating data from server to get difficulty value
         int levelId = level->m_levelID;
@@ -63,7 +75,7 @@ class $modify(EndLevelLayer)
 
             int accountId = GJAccountManager::get()->m_accountID;
             std::string argonToken = Mod::get()->getSavedValue<std::string>("argon_token");
-            
+        
             matjson::Value jsonBody;
             jsonBody["accountId"] = accountId;
             jsonBody["argonToken"] = argonToken;
@@ -121,11 +133,17 @@ class $modify(EndLevelLayer)
                         rewardLayer->m_diamondsLabel->setString(numToString(displayStars).c_str());
                         rewardLayer->m_diamonds = displayStars;
                         rewardLayer->m_diamondsSprite = CCSprite::create("rlStarIcon.png"_spr);
-                        rewardLayer->m_diamondsSprite->setScale(0.5f);
+                        
+                        // Replace the main display sprite
+                        if (auto node = rewardLayer->m_mainNode->getChildByType<CCSprite*>(0)) {
+                            node->setDisplayFrame(CCSprite::create("rlStarIcon.png"_spr)->displayFrame());
+                            node->setScale(1.f);
+                        }
 
                         endLayerRef->addChild(rewardLayer, 100);
                     }
                 }
+                
             }); });
     }
 };

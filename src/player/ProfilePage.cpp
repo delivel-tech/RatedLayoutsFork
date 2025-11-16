@@ -164,6 +164,10 @@ class $modify(ProfilePage)
             int stars = json["stars"].asInt().unwrapOrDefault();
             
             log::info("Profile data - points: {}, stars: {}", points, stars);
+
+            // store the values into the saved value
+            Mod::get()->setSavedValue("stars", stars);
+            Mod::get()->setSavedValue("points", points);
             
             // existing stats containers, this is so hacky but wanted to keep it at the right side
             auto blueprintStarsContainer = statsMenu->getChildByID("blueprint-stars-container");
