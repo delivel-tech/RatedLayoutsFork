@@ -1,12 +1,20 @@
 
 #include "ModRatePopup.hpp"
 
-bool ModRatePopup::setup(std::string title)
+bool ModRatePopup::setup(std::string title, GJGameLevel *level)
 {
     m_title = title;
     m_difficultySprite = nullptr;
     m_isDemonMode = false;
+    m_isFeatured = false;
     m_selectedRating = -1;
+    m_levelId = -1;
+
+    // get the level ID ya
+    if (level)
+    {
+        m_levelId = level->m_levelID;
+    }
 
     // title
     auto titleLabel = CCLabelBMFont::create(m_title.c_str(), "bigFont.fnt");
@@ -119,37 +127,118 @@ bool ModRatePopup::setup(std::string title)
     submitButtonItem->setPosition({m_mainLayer->getContentSize().width / 2, 0});
     menuButtons->addChild(submitButtonItem);
 
-    // toggle between normal or demon difficulty
+    // toggle between featured or stars only
     auto offSprite = CCSpriteGrayscale::create("rlfeaturedCoin.png"_spr);
     auto onSprite = CCSprite::create("rlfeaturedCoin.png"_spr);
-    auto toggleDif = CCMenuItemToggler::create(
+    auto toggleFeatured = CCMenuItemToggler::create(
         offSprite,
         onSprite,
         this,
-        menu_selector(ModRatePopup::onToggleDifficulty));
+        menu_selector(ModRatePopup::onToggleFeatured));
 
-    toggleDif->setPosition({0, 0});
-    menuButtons->addChild(toggleDif);
+    toggleFeatured->setPosition({0, 0});
+    menuButtons->addChild(toggleFeatured);
 
     m_mainLayer->addChild(menuButtons);
 
     // difficulty sprite on the right side (NA face by default)
+    m_difficultyContainer = CCNode::create();
+    m_difficultyContainer->setPosition({m_mainLayer->getContentSize().width - 50.f, 90.f});
     m_difficultySprite = GJDifficultySprite::create(0, (GJDifficultyName)-1);
-    m_difficultySprite->setPosition({m_mainLayer->getContentSize().width - 50.f, 90.f});
+    m_difficultySprite->setPosition({0, 0});
     m_difficultySprite->setScale(1.2f);
-    m_mainLayer->addChild(m_difficultySprite);
+    m_difficultyContainer->addChild(m_difficultySprite);
+    m_mainLayer->addChild(m_difficultyContainer);
 
     return true;
 }
 
 void ModRatePopup::onSubmitButton(CCObject *sender)
 {
-    return;
+    log::info("Submitting - Difficulty: {}, Featured: {}, Demon: {}",
+              m_selectedRating, m_isFeatured ? 1 : 0, m_isDemonMode ? 1 : 0);
+
+    // Get argon token
+    auto token = Mod::get()->getSavedValue<std::string>("argon_token");
+    if (token.empty())
+    {
+        log::error("Failed to get user token");
+        Notification::create("Authentication token not found", NotificationIcon::Error)->show();
+        return;
+    }
+
+    // account ID
+    auto accountId = GJAccountManager::get()->m_accountID;
+
+    // matjson payload
+    matjson::Value jsonBody = matjson::Value::object();
+    jsonBody["accountId"] = accountId;
+    jsonBody["argonToken"] = token;
+    jsonBody["levelId"] = m_levelId;
+    jsonBody["difficulty"] = m_selectedRating;
+    jsonBody["featured"] = m_isFeatured ? 1 : 0;
+
+    log::info("Sending request: {}", jsonBody.dump());
+
+    // Make HTTP request using geode's web request
+    auto postReq = web::WebRequest();
+    postReq.bodyJSON(jsonBody);
+    auto postTask = postReq.post("https://gdrate.arcticwoof.xyz/rate");
+
+    postTask.listen([this](web::WebResponse *response)
+                    {
+        log::info("Received response from server");
+        
+        if (!response->ok())
+        {
+            log::warn("Server returned non-ok status: {}", response->code());
+            Notification::create("Failed to rate layout", NotificationIcon::Error)->show();
+            return;
+        }
+        
+        auto jsonRes = response->json();
+        if (!jsonRes)
+        {
+            log::warn("Failed to parse JSON response");
+            Notification::create("Invalid server response", NotificationIcon::Error)->show();
+            return;
+        }
+        
+        auto json = jsonRes.unwrap();
+        bool success = json["success"].asBool().unwrapOrDefault();
+        
+        if (success)
+        {
+            log::info("Rate submission successful!");
+            Notification::create("Layout rated successfully!",NotificationIcon::Success)->show();
+            this->onClose(nullptr);
+        }
+        else
+        {
+            log::warn("Rate submission failed: success is false");
+            Notification::create("Failed to rate layout", NotificationIcon::Error)->show();
+        } });
 }
 
-void ModRatePopup::onToggleDifficulty(CCObject *sender)
+void ModRatePopup::onToggleFeatured(CCObject *sender)
 {
-    return;
+    m_isFeatured = !m_isFeatured;
+    log::info("Featured mode: {}", m_isFeatured);
+
+    auto existingCoin = m_difficultyContainer->getChildByID("featured-coin");
+    if (existingCoin)
+    {
+        existingCoin->removeFromParent(); // could do setVisible false but whatever
+    }
+
+    if (m_isFeatured)
+    {
+        auto featuredCoin = CCSprite::create("rlfeaturedCoin.png"_spr);
+        featuredCoin->setPosition({0, 0});
+        featuredCoin->setScale(1.2f);
+        featuredCoin->setID("featured-coin");
+        m_difficultyContainer->addChild(featuredCoin, -1);
+    }
 }
 
 void ModRatePopup::onToggleDemon(CCObject *sender)
@@ -269,16 +358,16 @@ void ModRatePopup::updateDifficultySprite(int rating)
     }
 
     m_difficultySprite = GJDifficultySprite::create(difficultyLevel, difficulty);
-    m_difficultySprite->setPosition({m_mainLayer->getContentSize().width - 50.f, 90.f});
+    m_difficultySprite->setPosition({0, 0});
     m_difficultySprite->setScale(1.2f);
-    m_mainLayer->addChild(m_difficultySprite);
+    m_difficultyContainer->addChild(m_difficultySprite);
 }
 
-ModRatePopup *ModRatePopup::create(std::string title)
+ModRatePopup *ModRatePopup::create(std::string title, GJGameLevel *level)
 {
     auto ret = new ModRatePopup();
 
-    if (ret && ret->initAnchored(380.f, 180.f, title, "GJ_square02.png"))
+    if (ret && ret->initAnchored(380.f, 180.f, title, level, "GJ_square02.png"))
     {
         ret->autorelease();
         return ret;

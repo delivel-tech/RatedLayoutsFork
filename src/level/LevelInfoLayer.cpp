@@ -92,7 +92,7 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
         if (Mod::get()->getSavedValue<int>("role") == 1)
         {
             log::info("Mod button clicked!");
-            auto popup = ModRatePopup::create("Mod: Rate Layout");
+            auto popup = ModRatePopup::create("Mod: Rate Layout", this->m_level);
             popup->show();
         }
         else
@@ -117,7 +117,7 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
         if (Mod::get()->getSavedValue<int>("role") == 2)
         {
             log::info("Admin button clicked!");
-            auto popup = ModRatePopup::create("Admin: Rate Layout");
+            auto popup = ModRatePopup::create("Admin: Rate Layout", this->m_level);
             popup->show();
         }
         else
