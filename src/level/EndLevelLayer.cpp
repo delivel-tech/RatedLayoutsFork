@@ -51,7 +51,7 @@ class $modify(EndLevelLayer)
         // capture EndLevelLayer as Ref
         Ref<EndLevelLayer> endLayerRef = this;
 
-        getTask.listen([endLayerRef, levelId](web::WebResponse *response)
+        getTask.listen([endLayerRef, levelId, this](web::WebResponse *response)
                        {
             log::info("Received rating response for completed level ID: {}", levelId);
 
@@ -95,7 +95,7 @@ class $modify(EndLevelLayer)
             auto submitReq = web::WebRequest();
             submitReq.bodyJSON(jsonBody);
             auto submitTask = submitReq.post("https://gdrate.arcticwoof.xyz/submitComplete");
-            submitTask.listen([endLayerRef, starReward, levelId](web::WebResponse *submitResponse)
+            submitTask.listen([endLayerRef, starReward, levelId, this](web::WebResponse *submitResponse)
             {
                 log::info("Received submitComplete response for level ID: {}", levelId);
 
@@ -124,19 +124,45 @@ class $modify(EndLevelLayer)
 
                 log::info("submitComplete success: {}, response stars: {}", success, responseStars);
 
-                if (success)
+                if (success) // ps. people can still cheat stars by exiting without saving (or crashing before actually completing the level)
                 {
                     // response stars minus the difficulty reward
                     int displayStars = responseStars - starReward;
                     log::info("Display stars: {} - {} = {}", responseStars, starReward, displayStars);
                     Mod::get()->setSavedValue<int>("stars", responseStars);
 
+                    // make the stars reward pop when u complete the level
+                    auto bigStarSprite = CCSprite::create("rlStarIconBig.png"_spr);
+                    bigStarSprite->setScale(1.2f);
+                    bigStarSprite->setPosition({m_mainLayer->getContentSize().width / 2 + 135, m_mainLayer->getContentSize().height / 2});
+                    bigStarSprite->setOpacity(0);
+                    bigStarSprite->setScale(0.5f);
+                    endLayerRef->m_mainLayer->addChild(bigStarSprite);
+
+                    // star animation lol
+                    auto scaleAction = CCScaleTo::create(1.f, .8f);
+                    auto bounceAction = CCEaseBounceOut::create(scaleAction);
+                    auto fadeAction = CCFadeIn::create(0.5f);
+                    auto spawnAction = CCSpawn::createWithTwoActions(bounceAction, fadeAction);
+                    bigStarSprite->runAction(spawnAction);
+
+                    // put the difficulty value next to the big star
+                    // making this look like an actual star reward in game
+                    auto difficultyLabel = CCLabelBMFont::create(
+                        fmt::format("+{}", starReward).c_str(),
+                        "bigFont.fnt"
+                    );
+                    difficultyLabel->setPosition({-5, bigStarSprite->getContentSize().height / 2});
+                    difficultyLabel->setAnchorPoint({1.0f, 0.5f});
+                    bigStarSprite->addChild(difficultyLabel);
+
                     // never used this before but its fancy
+                    // some devices crashes from this, idk why soggify
                     if (auto rewardLayer = CurrencyRewardLayer::create(
                         0, starReward, 0, 0,
                         CurrencySpriteType::Star, 0, CurrencySpriteType::Star,
                         0,
-                        endLayerRef->getPosition(), CurrencyRewardType::Default, 0.0, 1.0
+                        bigStarSprite->getPosition(), CurrencyRewardType::Default, 0.0, 1.0
                     ))
                     {
                         // display the calculated stars
