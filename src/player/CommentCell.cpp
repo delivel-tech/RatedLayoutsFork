@@ -29,7 +29,7 @@ class $modify(RLCommentCell, CommentCell)
         {
             return;
         }
-        // heres some hot fixes
+
         if (!m_mainLayer)
         {
             log::warn("main layer is null, cannot apply color");
@@ -50,43 +50,25 @@ class $modify(RLCommentCell, CommentCell)
             return;
         }
 
-        log::info("Applying comment text color for role: {}", m_fields->role);
+        log::debug("Applying comment text color for role: {}", m_fields->role);
 
-        if (auto commentTextLabel = typeinfo_cast<CCLabelBMFont *>(m_mainLayer->getChildByIDRecursive("comment-text-label")))
+        if (auto commentTextLabel = typeinfo_cast<CCLabelBMFont *>(m_mainLayer->getChildByID("comment-text-label")))
         {
-            log::info("Found and coloring comment-text-label");
+            log::debug("Found comment-text-label, applying color");
             commentTextLabel->setColor(color);
-            return;
-        }
-
-        log::warn("comment-text-label not found, searching all children");
-
-        auto children = m_mainLayer->getChildren();
-        if (children)
-        {
-            log::info("Found {} children in m_mainLayer", children->count());
-            CCObject *obj = nullptr;
-            CCARRAY_FOREACH(children, obj)
-            {
-                auto node = typeinfo_cast<CCNode *>(obj);
-                if (node)
-                {
-                    log::info("Child node ID: {}", node->getID());
-                }
-            }
         }
     }
 
     void fetchUserRole(int accountId)
     {
-        log::info("Fetching role for comment user ID: {}", accountId);
+        log::debug("Fetching role for comment user ID: {}", accountId);
         auto getTask = web::WebRequest()
                            .param("accountId", accountId)
                            .get("https://gdrate.arcticwoof.xyz/commentProfile");
 
         getTask.listen([this](web::WebResponse *response)
                        {
-            log::info("Received role response from server for comment");
+            log::debug("Received role response from server for comment");
 
             if (!response->ok()) {
                 log::warn("Server returned non-ok status: {}", response->code());
@@ -103,7 +85,7 @@ class $modify(RLCommentCell, CommentCell)
             int role = json["role"].asInt().unwrapOrDefault();
             m_fields->role = role;
 
-            log::info("User comment role: {}", role);
+            log::debug("User comment role: {}", role);
 
             this->loadBadgeForComment(); });
     }
