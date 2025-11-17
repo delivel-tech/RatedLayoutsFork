@@ -393,8 +393,7 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
         }
     }
 
-    void
-    requestStatus(int accountId)
+    void requestStatus(int accountId)
     {
         // argon my beloved <3
         std::string token;
