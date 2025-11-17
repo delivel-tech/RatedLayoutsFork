@@ -105,35 +105,112 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
         auto getTask = getReq.get(fmt::format("https://gdrate.arcticwoof.xyz/fetch?levelId={}", levelId));
 
         Ref<RLLevelInfoLayer> layerRef = this;
+        auto difficultySprite = layerRef->getChildByID("difficulty-sprite");
 
-        getTask.listen([layerRef](web::WebResponse *response)
-                       {
-            log::info("Received rating response from server");
+        getTask.listen([layerRef, difficultySprite](web::WebResponse *response)
+                   {
+        log::info("Received rating response from server");
 
-            if (!layerRef)
+        if (!layerRef)
+        {
+            log::warn("LevelInfoLayer has been destroyed");
+            return;
+        }
+        
+        if (!response->ok())
+        {
+            log::warn("Server returned non-ok status: {}", response->code());
+            return;
+        }
+        
+        auto jsonRes = response->json();
+        if (!jsonRes)
+        {
+            log::warn("Failed to parse JSON response");
+            return;
+        }
+        
+        auto json = jsonRes.unwrap();
+        int difficulty = json["difficulty"].asInt().unwrapOrDefault();
+        int featured = json["featured"].asInt().unwrapOrDefault();
+        
+        log::info("difficulty: {}, featured: {}", difficulty, featured);
+        
+        // check if the level needs to submit completion reward if completed
+        if (GameStatsManager::sharedState()->hasCompletedOnlineLevel(layerRef->m_level->m_levelID))
+        {
+            log::info("Level is completed, submitting completion reward");
+            
+            int levelId = layerRef->m_level->m_levelID;
+            int accountId = GJAccountManager::get()->m_accountID;
+            std::string argonToken = Mod::get()->getSavedValue<std::string>("argon_token");
+            
+            matjson::Value jsonBody;
+            jsonBody["accountId"] = accountId;
+            jsonBody["argonToken"] = argonToken;
+            jsonBody["levelId"] = levelId;
+            
+            auto submitReq = web::WebRequest();
+            submitReq.bodyJSON(jsonBody);
+            auto submitTask = submitReq.post("https://gdrate.arcticwoof.xyz/submitComplete");
+            
+            submitTask.listen([layerRef, difficulty, levelId, difficultySprite](web::WebResponse *submitResponse)
             {
-                log::warn("LevelInfoLayer has been destroyed");
-                return;
+                log::info("Received submitComplete response for level ID: {}", levelId);
+                
+                if (!layerRef)
+                {
+                    log::warn("LevelInfoLayer has been destroyed");
+                    return;
+                }
+                
+                if (!submitResponse->ok())
+                {
+                    log::warn("submitComplete returned non-ok status: {}", submitResponse->code());
+                    return;
+                }
+                
+                auto submitJsonRes = submitResponse->json();
+                if (!submitJsonRes)
+                {
+                    log::warn("Failed to parse submitComplete JSON response");
+                    return;
+                }
+                
+                auto submitJson = submitJsonRes.unwrap();
+                bool success = submitJson["success"].asBool().unwrapOrDefault();
+                int responseStars = submitJson["stars"].asInt().unwrapOrDefault();
+                
+                log::info("submitComplete success: {}, response stars: {}", success, responseStars);
+                
+                if (success)
+                {
+                    int displayStars = responseStars - difficulty;
+                    log::info("Display stars: {} - {} = {}", responseStars, difficulty, displayStars);
+                    
+                    if (auto rewardLayer = CurrencyRewardLayer::create(
+                        0, difficulty, 0, 0,
+                        CurrencySpriteType::Star, 0, CurrencySpriteType::Star,
+                        0,
+                        difficultySprite->getPosition(), CurrencyRewardType::Default, 0.0, 1.0
+                    ))
+                        {
+                            rewardLayer->m_starsLabel->setString(numToString(displayStars).c_str());
+                            rewardLayer->m_stars = displayStars;
+                            rewardLayer->m_starsSprite = CCSprite::create("rlStarIcon.png"_spr);
+                            
+                            if (auto node = rewardLayer->m_mainNode->getChildByType<CCSprite*>(0)) {
+                                node->setDisplayFrame(CCSprite::create("rlStarIcon.png"_spr)->displayFrame());
+                                node->setScale(1.f);
+                            }
+                            
+                            layerRef->addChild(rewardLayer, 100);
+                        }
+                    } else {
+                        log::warn("level already completed and rewarded beforehand");
+                    }
+                });
             }
-            
-            if (!response->ok())
-            {
-                log::warn("Server returned non-ok status: {}", response->code());
-                return;
-            }
-            
-            auto jsonRes = response->json();
-            if (!jsonRes)
-            {
-                log::warn("Failed to parse JSON response");
-                return;
-            }
-            
-            auto json = jsonRes.unwrap();
-            int difficulty = json["difficulty"].asInt().unwrapOrDefault();
-            int featured = json["featured"].asInt().unwrapOrDefault();
-            
-            log::info("difficulty: {}, featured: {}", difficulty, featured);
             
             // Map difficulty to difficultyLevel
             int difficultyLevel = 0;
