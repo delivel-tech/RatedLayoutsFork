@@ -143,10 +143,18 @@ class $modify(RLProfilePage, ProfilePage)
         postReq.bodyJSON(jsonBody);
         auto postTask = postReq.post("https://gdrate.arcticwoof.xyz/profile");
 
+        Ref<RLProfilePage> pageRef = this;
+
         // Handle the response
-        postTask.listen([this, statsMenu](web::WebResponse *response)
+        postTask.listen([pageRef, statsMenu](web::WebResponse *response)
                         {
             log::info("Received response from server");
+
+            if (!pageRef || !pageRef->m_mainLayer)
+            {
+                log::warn("ProfilePage has been destroyed, skipping profile data update");
+                return;
+            }
             
             if (!response->ok()) {
                 log::warn("Server returned non-ok status: {}", response->code());
@@ -167,7 +175,7 @@ class $modify(RLProfilePage, ProfilePage)
             log::info("Profile data - points: {}, stars: {}", points, stars);
 
             // store the values into the saved value
-            m_fields->role = role;
+            pageRef->m_fields->role = role;
             
             // existing stats containers, this is so hacky but wanted to keep it at the right side
             auto blueprintStarsContainer = statsMenu->getChildByID("blueprint-stars-container");
@@ -223,17 +231,17 @@ class $modify(RLProfilePage, ProfilePage)
                 statsMenu->addChild(layoutIcon);
             }
             
-            m_fields->blueprintStarsCount = blueprintStarsCount;
-            m_fields->layoutPointsCount = layoutPointsCount;
+            pageRef->m_fields->blueprintStarsCount = blueprintStarsCount;
+            pageRef->m_fields->layoutPointsCount = layoutPointsCount;
             
             statsMenu->updateLayout();
             
             // only set saved data if you own the profile
-            if (m_ownProfile) {
-            Mod::get()->setSavedValue("role", m_fields->role);
+            if (pageRef->m_ownProfile) {
+            Mod::get()->setSavedValue("role", pageRef->m_fields->role);
             }
             
-            this->loadBadgeFromUserInfo(); });
+            pageRef->loadBadgeFromUserInfo(); });
     }
     // badge
     void loadPageFromUserInfo(GJUserScore *a2)

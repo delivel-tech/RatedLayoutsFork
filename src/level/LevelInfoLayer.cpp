@@ -104,9 +104,17 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
         auto getReq = web::WebRequest();
         auto getTask = getReq.get(fmt::format("https://gdrate.arcticwoof.xyz/fetch?levelId={}", levelId));
 
-        getTask.listen([this](web::WebResponse *response)
+        Ref<RLLevelInfoLayer> layerRef = this;
+
+        getTask.listen([layerRef](web::WebResponse *response)
                        {
             log::info("Received rating response from server");
+
+            if (!layerRef)
+            {
+                log::warn("LevelInfoLayer has been destroyed");
+                return;
+            }
             
             if (!response->ok())
             {
@@ -179,7 +187,7 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
             }
             
             // Update the existing difficulty sprite
-            auto difficultySprite = this->getChildByID("difficulty-sprite");
+            auto difficultySprite = layerRef->getChildByID("difficulty-sprite");
             if (difficultySprite)
             {
                 auto sprite = static_cast<GJDifficultySprite*>(difficultySprite);
@@ -221,16 +229,16 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
                     difficultySprite->addChild(starLabelValue);
                 }
 
-                if (GameStatsManager::sharedState()->hasCompletedOnlineLevel(this->m_level->m_levelID))
+                if (GameStatsManager::sharedState()->hasCompletedOnlineLevel(layerRef->m_level->m_levelID))
                 {
                     starLabelValue->setColor({ 0, 150, 255 }); // cyan
                 }
 
-                auto coinIcon1 = this->getChildByID("coin-icon-1");
-                auto coinIcon2 = this->getChildByID("coin-icon-2");
-                auto coinIcon3 = this->getChildByID("coin-icon-3");
+                auto coinIcon1 = layerRef->getChildByID("coin-icon-1");
+                auto coinIcon2 = layerRef->getChildByID("coin-icon-2");
+                auto coinIcon3 = layerRef->getChildByID("coin-icon-3");
 
-                if (!m_fields->m_difficultyOffsetApplied && coinIcon1)
+                if (!layerRef->m_fields->m_difficultyOffsetApplied && coinIcon1)
                 {
                     if (isDemon)
                     {
@@ -239,7 +247,7 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
                     {
                         sprite->setPositionY(sprite->getPositionY() + 15);
                     }
-                    m_fields->m_difficultyOffsetApplied = true;
+                    layerRef->m_fields->m_difficultyOffsetApplied = true;
 
                     // time to adjust the coins as well
                     coinIcon1->setPositionY(coinIcon1->getPositionY() - (isDemon ? 6 : 4)); // very precise yesh
@@ -291,8 +299,16 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
             auto getReq = web::WebRequest();
             auto getTask = getReq.get(fmt::format("https://gdrate.arcticwoof.xyz/fetch?levelId={}", levelId));
 
-            getTask.listen([this](web::WebResponse *response)
+            Ref<RLLevelInfoLayer> layerRef = this;
+
+            getTask.listen([layerRef](web::WebResponse *response)
                            {
+                if (!layerRef)
+                {
+                    log::warn("LevelInfoLayer has been destroyed, skipping level update");
+                    return;
+                }
+
                 if (!response->ok() || !response->json())
                 {
                     return;
@@ -301,7 +317,7 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
                 auto json = response->json().unwrap();
                 int difficulty = json["difficulty"].asInt().unwrapOrDefault();
                 
-                auto difficultySprite = this->getChildByID("difficulty-sprite");
+                auto difficultySprite = layerRef->getChildByID("difficulty-sprite");
                 if (difficultySprite)
                 {
                     auto sprite = static_cast<GJDifficultySprite*>(difficultySprite);
@@ -442,10 +458,18 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
         postReq.bodyJSON(jsonBody);
         auto postTask = postReq.post("https://gdrate.arcticwoof.xyz/access");
 
+        Ref<RLLevelInfoLayer> layerRef = this;
+
         // handle the response
-        postTask.listen([this](web::WebResponse *response)
+        postTask.listen([layerRef](web::WebResponse *response)
                         {
             log::info("Received response from server");
+
+            if (!layerRef)
+            {
+                log::warn("LevelInfoLayer has been destroyed, skipping role update");
+                return;
+            }
 
             if (!response->ok())
             {
