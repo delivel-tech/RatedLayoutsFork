@@ -17,6 +17,8 @@ class $modify(GJGarageLayer)
         if (!GJGarageLayer::init())
             return false;
 
+        fetchProfileData(GJAccountManager::get()->m_accountID);
+
         auto statMenu = this->getChildByID("capeling.garage-stats-menu/stats-menu");
 
         auto starSprite = CCSprite::create("rlStarIcon.png"_spr);
@@ -31,7 +33,6 @@ class $modify(GJGarageLayer)
             statMenu->addChild(myStatItem);
             statMenu->updateLayout();
         }
-        fetchProfileData(GJAccountManager::get()->m_accountID);
 
         return true;
     }

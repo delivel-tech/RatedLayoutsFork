@@ -108,7 +108,7 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
         auto difficultySprite = layerRef->getChildByID("difficulty-sprite");
 
         getTask.listen([layerRef, difficultySprite](web::WebResponse *response)
-                   {
+                       {
         log::info("Received rating response from server");
 
         if (!layerRef)
@@ -205,6 +205,8 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
                             }
                             
                             layerRef->addChild(rewardLayer, 100);
+                            // @geode-ignore(unknown-resource)
+                            FMODAudioEngine::sharedEngine()->playEffect("gold02.ogg");
                         }
                     } else {
                         log::warn("level already completed and rewarded beforehand");

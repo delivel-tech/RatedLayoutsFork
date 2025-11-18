@@ -177,6 +177,8 @@ class $modify(EndLevelLayer)
                         }
 
                         endLayerRef->addChild(rewardLayer, 100);
+                        // @geode-ignore(unknown-resource)
+                        FMODAudioEngine::sharedEngine()->playEffect("gold02.ogg");
                     }
                 } else {
                     Notification::create("Stars already claimed for this level!", NotificationIcon::Warning)->show();

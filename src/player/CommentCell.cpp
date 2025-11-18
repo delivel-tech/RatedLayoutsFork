@@ -145,7 +145,7 @@ class $modify(RLCommentCell, CommentCell)
     {
         FLAlertLayer::create(
             "Layout Moderator",
-            "This user can suggest layout levels for Rated Layouts to the Layout Admins.",
+            "This user can <cj>suggest layout levels</c> for <cl>Rated Layouts</c> to the <cr>Layout Admins</c>.",
             "OK")
             ->show();
     }
@@ -154,7 +154,7 @@ class $modify(RLCommentCell, CommentCell)
     {
         FLAlertLayer::create(
             "Layout Administrator",
-            "This user can rate layout levels for Rated Layouts. They can change the featured ranking on the featured layout levels.",
+            "This user can <cj>rate layout levels</c> for <cl>Rated Layouts</c>. They can change the <cy>featured ranking on the featured layout levels.</c>",
             "OK")
             ->show();
     }
