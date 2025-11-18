@@ -5,6 +5,9 @@
 
 using namespace geode::prelude;
 
+// most of the code here are just repositioning the stars and coins to fit the new difficulty icon
+// its very messy, yes but it just works
+// do please clean up my messy code pls
 class $modify(RLLevelInfoLayer, LevelInfoLayer)
 {
     struct Fields
@@ -335,6 +338,18 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
                     if (coinIcon3)
                         coinIcon3->setPositionY(coinIcon3->getPositionY() - (isDemon ? 6 : 4));
                 }
+                else if (!layerRef->m_fields->m_difficultyOffsetApplied && !coinIcon1)
+                {
+                    // No coins, but still apply offset for levels without coins
+                    if (isDemon)
+                    {
+                        sprite->setPositionY(sprite->getPositionY() + 15);
+                    } else
+                    {
+                        sprite->setPositionY(sprite->getPositionY() + 10);
+                    }
+                    layerRef->m_fields->m_difficultyOffsetApplied = true;
+                }
             }
             
             // Update featured coin visibility
@@ -475,38 +490,36 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
                     if (isDemon)
                     {
                         // if coin exists, reposition it
-                        auto coinIcon1 = sprite->getChildByID("coin-icon-1");
+                        auto coinIcon1 = layerRef->getChildByID("coin-icon-1");
                         if (coinIcon1)
                         {
-                            sprite->setPositionY(sprite->getPositionY() + 30);
+                            sprite->setPositionY(sprite->getPositionY() + 20); // lol
                         } else 
                         {
-                            sprite->setPositionY(sprite->getPositionY() + 20);
+                            sprite->setPositionY(sprite->getPositionY() + 10);
                         }
 
                     } else
                     {
-                        sprite->setPositionY(sprite->getPositionY() + 15);
+                        sprite->setPositionY(sprite->getPositionY() + 10);
                     }
                     
+                    // Create star icon and label AFTER frame update with correct sprite size
                     auto starIcon = CCSprite::create("rlStarIcon.png"_spr);
-                    starIcon->setPosition({difficultySprite->getContentSize().width / 2 + 7, -7});
                     starIcon->setScale(0.53f);
                     starIcon->setID("rl-star-icon");
                     sprite->addChild(starIcon);
                     
                     auto starLabel = CCLabelBMFont::create(numToString(difficulty).c_str(), "bigFont.fnt");
                     starLabel->setID("rl-star-label");
-                    starLabel->setPosition({starIcon->getPositionX() - 7, starIcon->getPositionY()});
                     starLabel->setScale(0.4f);
                     starLabel->setAnchorPoint({1.0f, 0.5f});
                     starLabel->setAlignment(kCCTextAlignmentRight);
                     sprite->addChild(starLabel);
                     
-                    // another hacky fix
-                    starIcon->setPosition({difficultySprite->getContentSize().width / 2 + 7, -7});
+                    starIcon->setPosition({sprite->getContentSize().width / 2 + 7, -7});
                     starLabel->setPosition({starIcon->getPositionX() - 7, starIcon->getPositionY()});
-                    
+
                     // Update featured coin position
                     auto featureCoin = sprite->getChildByID("featured-coin");
                     if (featureCoin)
@@ -514,11 +527,12 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
                         featureCoin->setPosition({difficultySprite->getContentSize().width / 2, difficultySprite->getContentSize().height / 2});
                     }
 
-                    // hacky fix to reposition stars after frame update
-                    auto delayAction = CCDelayTime::create(0.1f);
+                    // delayed reposition for stars after frame update to ensure proper positioning
+                    auto delayAction = CCDelayTime::create(0.15f);
                     auto callFunc = CCCallFunc::create(layerRef, callfunc_selector(RLLevelInfoLayer::repositionStars));
                     auto sequence = CCSequence::create(delayAction, callFunc, nullptr);
                     layerRef->runAction(sequence);
+                    log::debug("levelUpdateFinished: repositionStars callback scheduled");
                 } });
         }
     }
@@ -590,21 +604,25 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer)
     // bruh
     void repositionStars()
     {
-        log::debug("Repositioning stars...");
+        log::info("repositionStars() called!");
         auto difficultySprite = this->getChildByID("difficulty-sprite");
         if (difficultySprite)
         {
-            auto starIcon = difficultySprite->getChildByID("rl-star-icon");
-            auto starLabel = difficultySprite->getChildByID("rl-star-label");
+            auto sprite = static_cast<GJDifficultySprite *>(difficultySprite);
+            auto starIcon = static_cast<CCSprite *>(difficultySprite->getChildByID("rl-star-icon"));
+            auto starLabel = static_cast<CCLabelBMFont *>(difficultySprite->getChildByID("rl-star-label"));
 
-            if (starIcon)
+            if (starIcon && sprite)
             {
-                starIcon->setPosition({difficultySprite->getContentSize().width / 2 + 7, -7});
-            }
+                starIcon->setPosition({sprite->getContentSize().width / 2 + 7, -7});
 
-            if (starLabel && starIcon)
-            {
-                starLabel->setPosition({starIcon->getPositionX() - 7, starIcon->getPositionY()});
+                if (starLabel)
+                {
+                    float labelX = starIcon->getPositionX() - 7;
+                    float labelY = starIcon->getPositionY();
+                    log::info("Repositioning star label to ({}, {})", labelX, labelY);
+                    starLabel->setPosition({labelX, labelY});
+                }
             }
         }
     }
