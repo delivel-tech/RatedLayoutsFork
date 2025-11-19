@@ -18,4 +18,4 @@
 
 # v0.1.0-beta.1
 
-- i hate robtop's rating system, so i made my own rating system. check mate boomers
+- "i love robtop's rating system, its so fair and totally not rigged, i swear i have 12 sends in adrifto and still not rated. totally fair"
