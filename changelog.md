@@ -1,3 +1,7 @@
+# v0.1.4-beta.1
+
+- Added Leaderboard! You can now view the top players based on the number of stars and creator points they have collected from rated layouts.
+
 # v0.1.3-beta.1
 
 - Levels ratings are cached locally to reduce server requests and improve performance. (and removed when deleting the level)

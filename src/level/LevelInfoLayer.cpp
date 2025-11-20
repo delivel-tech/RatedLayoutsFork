@@ -161,8 +161,10 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer) {
 
             log::info("Level download finished, fetching rating data...");
 
+            
             // Fetch rating data from server
             int levelId = this->m_level->m_levelID;
+            deleteLevelFromCache(levelId); // delete cache
             log::info("Fetching rating data for level ID: {}", levelId);
 
             // Try to load from cache first
@@ -617,17 +619,17 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer) {
                               break;
                   }
 
-                  // BEFORE updating frame
+                  // RESET: Remove all star icons and labels FIRST
                   auto existingStarIcon =
                       sprite->getChildByID("rl-star-icon");
                   auto existingStarLabel =
                       sprite->getChildByID("rl-star-label");
 
-                  if (existingStarIcon || difficulty == 0) {
+                  if (existingStarIcon) {
                         existingStarIcon->removeFromParent();
                   }
 
-                  if (existingStarLabel || difficulty == 0) {
+                  if (existingStarLabel) {
                         existingStarLabel->removeFromParent();
                   }
 
@@ -650,49 +652,45 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer) {
                         sprite->setPositionY(sprite->getPositionY() + 10);
                   }
 
-                  // if rated just now
-                  if (difficulty != 0) {
-                        // Create star icon and label AFTER frame update with
-                        // correct sprite size
-                        auto starIcon = CCSprite::create("rlStarIcon.png"_spr);
-                        starIcon->setScale(0.53f);
-                        starIcon->setID("rl-star-icon");
-                        sprite->addChild(starIcon);
+                  // RECREATE: Create fresh star icon and label
+                  auto starIcon = CCSprite::create("rlStarIcon.png"_spr);
+                  starIcon->setScale(0.53f);
+                  starIcon->setID("rl-star-icon");
+                  sprite->addChild(starIcon);
 
-                        auto starLabel = CCLabelBMFont::create(
-                            numToString(difficulty).c_str(), "bigFont.fnt");
-                        starLabel->setID("rl-star-label");
-                        starLabel->setScale(0.4f);
-                        starLabel->setAnchorPoint({1.0f, 0.5f});
-                        starLabel->setAlignment(kCCTextAlignmentRight);
-                        sprite->addChild(starLabel);
+                  auto starLabel = CCLabelBMFont::create(
+                      numToString(difficulty).c_str(), "bigFont.fnt");
+                  starLabel->setID("rl-star-label");
+                  starLabel->setScale(0.4f);
+                  starLabel->setAnchorPoint({1.0f, 0.5f});
+                  starLabel->setAlignment(kCCTextAlignmentRight);
+                  sprite->addChild(starLabel);
 
-                        starIcon->setPosition(
-                            {sprite->getContentSize().width / 2 + 7, -7});
-                        starLabel->setPosition({starIcon->getPositionX() - 7,
-                                                starIcon->getPositionY()});
+                  starIcon->setPosition(
+                      {sprite->getContentSize().width / 2 + 7, -7});
+                  starLabel->setPosition({starIcon->getPositionX() - 7,
+                                          starIcon->getPositionY()});
 
-                        // Update featured coin position
-                        auto featureCoin = sprite->getChildByID("featured-coin");
-                        if (featureCoin) {
-                              featureCoin->setPosition(
-                                  {difficultySprite->getContentSize().width / 2,
-                                   difficultySprite->getContentSize().height / 2});
-                        }
-
-                        // delayed reposition for stars after frame update to ensure
-                        // proper positioning
-                        auto delayAction = CCDelayTime::create(0.15f);
-                        auto callFunc = CCCallFunc::create(
-                            layerRef,
-                            callfunc_selector(RLLevelInfoLayer::repositionStars));
-                        auto sequence =
-                            CCSequence::create(delayAction, callFunc, nullptr);
-                        layerRef->runAction(sequence);
-                        log::debug(
-                            "levelUpdateFinished: repositionStars callback "
-                            "scheduled");
+                  // Update featured coin position
+                  auto featureCoin = sprite->getChildByID("featured-coin");
+                  if (featureCoin) {
+                        featureCoin->setPosition(
+                            {difficultySprite->getContentSize().width / 2,
+                             difficultySprite->getContentSize().height / 2});
                   }
+
+                  // delayed reposition for stars after frame update to ensure
+                  // proper positioning
+                  auto delayAction = CCDelayTime::create(0.15f);
+                  auto callFunc = CCCallFunc::create(
+                      layerRef,
+                      callfunc_selector(RLLevelInfoLayer::repositionStars));
+                  auto sequence =
+                      CCSequence::create(delayAction, callFunc, nullptr);
+                  layerRef->runAction(sequence);
+                  log::debug(
+                      "levelUpdateFinished: repositionStars callback "
+                      "scheduled");
             }
       }
 

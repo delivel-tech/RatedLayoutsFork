@@ -18,11 +18,11 @@ This mod intergretes with the current rating system and improved <cr>Demon Ratin
 - **Faster Rating Process**: Community focus rating system which makes it easier to get levels rated quickly.
 - **Moderator Badges**: Special badges for moderators to identify the layout moderators and admins!
 - **Lower Rating Standards**: More levels can be rated as rated layout levels with lower rating standards compared to the Robtop's rating system.
+- **Leaderboard Integration**: Compete with other players on leaderboards for the most Blueprint Stars and Blueprint Creator Points!
 
 ## Up-coming Features
 
 - **Custom Achievements**: Custom Achievements for completing rated layout levels and achieving milestones.
-- **Leaderboard Integration**: Compete with other players on leaderboards for the most Blueprint Stars and Blueprint Creator Points!
 - **Daily and Weekly Rated Layout Levels**: New daily and weekly demon rated layout levels to showcase!
 
 <co>**Note:** This is currently in beta and expected to have some bugs and unfinished features. Please report any issues you encounter!</c>
