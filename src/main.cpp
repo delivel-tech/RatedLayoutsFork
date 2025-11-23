@@ -57,24 +57,19 @@ class $modify(SupportLayer) {
 
       auto json = jsonRes.unwrap();
       int role = json["role"].asInt().unwrapOrDefault();
-
+      Mod::get()->setSavedValue<int>("role", role);
       // role check lol
-      if (role == 1 && (Mod::get()->getSavedValue<int>("role") != 1)) {
+      if (role == 1) {
         log::info("Granted Layout Mod role");
-        Notification::create("You have been granted Layout Mod access.",
-                             NotificationIcon::Success)
+        Notification::create("Granted Layout Mod.", NotificationIcon::Success)
             ->show();
-        Mod::get()->setSavedValue<int>("role", role);
-      } else if (role == 2 && (Mod::get()->getSavedValue<int>("role") != 2)) {
+      } else if (role == 2) {
         log::info("Granted Layout Admin role");
-        Notification::create("You have been granted Layout Admin access.",
-                             NotificationIcon::Success)
+        Notification::create("Granted Layout Admin.", NotificationIcon::Success)
             ->show();
-        Mod::get()->setSavedValue<int>("role", role);
       } else {
         Notification::create("Nothing happened.", NotificationIcon::Error)
             ->show();
-        Mod::get()->setSavedValue<int>("role", 0);
       }
     });
   }
