@@ -1,7 +1,11 @@
+# v0.1.6-beta.1
+
+- Added a custom layer for all Rated Layouts related features. (found at the bottom left of the creator layer)
+- Sprite changes to make sure its consistent with the theme.
+
 # v0.1.5-beta.1
 
 - Added Player's Icons at the leaderboard. Might not update based on your profile but it's usually stored for statistics purposes.
-- Added a custom layer for all Rated Layouts related features. (found at the bottom left of the creator layer)
 - Role request is similar process as getting a moderator role in the actual game. Good luck
 
 # v0.1.4-beta.1
