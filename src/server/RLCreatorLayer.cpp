@@ -65,6 +65,8 @@ bool RLCreatorLayer::init() {
       mainMenu->addChild(sendItem);
       mainMenu->updateLayout();
 
+      this->setKeypadEnabled(true);
+
       return true;
 }
 

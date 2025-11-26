@@ -85,6 +85,8 @@ bool RLLeaderboardLayer::init() {
       infoMenu->addChild(infoButton);
       this->addChild(infoMenu);
 
+      this->setKeypadEnabled(true);
+
       return true;
 }
 
