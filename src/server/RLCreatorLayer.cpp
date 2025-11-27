@@ -28,7 +28,7 @@ bool RLCreatorLayer::init() {
 
       auto mainMenu = CCMenu::create();
       mainMenu->setPosition({winSize.width / 2, winSize.height / 2 - 10});
-      mainMenu->setContentSize({320.f, 240.f});
+      mainMenu->setContentSize({350.f, 240.f});
       mainMenu->setLayout(RowLayout::create()
                               ->setGap(6.f)
                               ->setGrowCrossAxis(true)
@@ -829,98 +829,118 @@ bool RLCreatorLayer::init() {
 }
 
 void RLCreatorLayer::onUnknownButton(CCObject* sender) {
-      auto rng = rand() % 9;
+      auto rng = rand() % 11;
       DialogObject* dialogObj = nullptr;
       // the yapp-a-ton
       switch (rng) {
             case 0:
                   dialogObj = DialogObject::create(
-                      "Mechanic",
+                      "Level Creator",
                       "Shh... don't tell anyone about this but I think <cg>RubRub</c> <cr>hates</c> this mod!",
-                      39,
+                      28,
                       .8f,
                       false,
                       ccWHITE);
                   break;
             case 1:
                   dialogObj = DialogObject::create(
-                      "Mechanic",
+                      "Level Creator",
                       "Do you hate the <cg>RobTop's</c> <cr>rating system</c>? Me too... Let's keep this between us.",
-                      39,
+                      28,
                       .8f,
                       false,
                       ccWHITE);
                   break;
             case 2:
                   dialogObj = DialogObject::create(
-                      "Mechanic",
+                      "Level Creator",
                       "Psst... Want to know a secret? <cb>Rated Layouts</c> is actually <cl>better</c> than <cg>RobTop's</c> rating system!",
-                      39,
+                      28,
                       .8f,
                       false,
                       ccWHITE);
                   break;
             case 3:
                   dialogObj = DialogObject::create(
-                      "Mechanic",
+                      "Level Creator",
                       "I believe we need a <cg>decentralized</c> rating system. <cb>Rated Layouts</c> is the future!",
-                      39,
+                      28,
                       .8f,
                       false,
                       ccWHITE);
                   break;
             case 4:
                   dialogObj = DialogObject::create(
-                      "Mechanic",
+                      "Level Creator",
                       "Between you and me, I think <cg>RobTop</c> could learn a thing or two from <cb>Rated Layouts</c> rating system.",
-                      39,
+                      28,
                       .8f,
                       false,
                       ccWHITE);
                   break;
             case 5:
                   dialogObj = DialogObject::create(
-                      "Mechanic",
+                      "Level Creator",
                       "You know, <cb>Rated Layouts</c> is more than just a rating system; it's us <co>tired creators</c> gambling our <cr>sanity</c> to get a <cr><s250>SINGLE</s></c> <cy>mod sent!</c>",
-                      46,
+                      28,
                       .8f,
                       false,
                       ccWHITE);
                   break;
             case 6:
                   dialogObj = DialogObject::create(
-                      "Mechanic",
+                      "Level Creator",
                       "Who ever made this <cl>new rating system</c> is a <cg>genius</c>! Finally, you can get the <co>recognition</c> you deserve!",
-                      39,
+                      28,
                       .8f,
                       false,
                       ccWHITE);
                   break;
             case 7:
                   dialogObj = DialogObject::create(
-                      "Mechanic",
+                      "Level Creator",
                       "Make <cl>rate worthy</c> level, join a <cy>mod level request stream</c>, see <cr>100 levels queued</c>, get <cc>depressed</c>, repeat.",
-                      50,
+                      28,
                       .8f,
                       false,
                       ccWHITE);
                   break;
             case 8:
                   dialogObj = DialogObject::create(
-                      "Mechanic",
+                      "Level Creator",
                       "It's funny that <cb>Rated Layouts</c> actually has more than <cg>two</c> people who <cy>rate levels</c>. <cg>RobTop's</c> rating system has like... what, <cr>one?</c>",
-                      38,
+                      28,
                       .8f,
                       false,
                       ccWHITE);
+                  break;
             case 9:
                   dialogObj = DialogObject::create(
-                      "Mechanic",
-                      "You know, sometimes I wonder if <cg>RobTop</c> even plays the entire level while rating levels. With <cb>Rated Layouts</c>, at least I know someone <cr>actually</c> plays my level before rating it!",
-                      49,
+                      "Level Creator",
+                      "You know, sometimes I wonder if <cg>RobTop</c> even plays the entire level while rating levels.",
+                      28,
                       .8f,
                       false,
                       ccWHITE);
+                  break;
+                      case 10:
+                  dialogObj = DialogObject::create(
+                      "Level Creator",
+                      "I'm <co>annoyed</c> that <cy>popular creators</c> always get their levels rated <cl>instantly</c>, while <cb>unknown creators</c> like us have to wait <s250><cr>weeks</c></s> just to get a <cy>rated level</c>.",
+                      28,
+                      .6f,
+                      false,
+                      ccWHITE);
+                  break;
+                  case 11:
+                  dialogObj = DialogObject::create(
+                      "Level Creator",
+                      "Sometimes I feel like <cr>RobTop</c> rates levels based on <cg>their popularity status</c> rather than the actual <cb>quality of the level</c>. It's so <co>frustrating</c>!",
+                      28,
+                      .6f,
+                      false,
+                      ccWHITE);
+                      
       }
       if (dialogObj) {
             auto dialog = DialogLayer::createDialogLayer(dialogObj, nullptr, 2);
