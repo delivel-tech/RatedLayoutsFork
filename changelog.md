@@ -1,6 +1,7 @@
 # v0.1.7-beta.1
 
 - Added Info Button at the Rated Layouts Creator Layer that explains about Rated Layouts and its features.
+- My sanity is in a dialog form now...
 - Minor fixes and improvements.
 
 # v0.1.6-beta.1

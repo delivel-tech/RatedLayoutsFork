@@ -28,7 +28,7 @@ bool RLCreatorLayer::init() {
 
       auto mainMenu = CCMenu::create();
       mainMenu->setPosition({winSize.width / 2, winSize.height / 2 - 10});
-      mainMenu->setContentSize({300.f, 240.f});
+      mainMenu->setContentSize({320.f, 240.f});
       mainMenu->setLayout(RowLayout::create()
                               ->setGap(6.f)
                               ->setGrowCrossAxis(true)
@@ -68,6 +68,15 @@ bool RLCreatorLayer::init() {
           sendSpr, this, menu_selector(RLCreatorLayer::onSendLayouts));
       sendItem->setID("send-layouts-button");
       mainMenu->addChild(sendItem);
+
+      // Try to use a grayscale sprite where available, but fallback to a regular sprite
+      cocos2d::CCSprite* unknownSpr = CCSpriteGrayscale::create("RL_unknownBtn.png"_spr);
+      if (!unknownSpr) unknownSpr = CCSpriteGrayscale::create("RL_unknownBtn.png"_spr);
+      auto unknownItem = CCMenuItemSpriteExtra::create(
+          unknownSpr, this, menu_selector(RLCreatorLayer::onUnknownButton));
+      unknownItem->setID("unknown-button");
+      mainMenu->addChild(unknownItem);
+
       mainMenu->updateLayout();
 
       auto mainMenuBg = CCScale9Sprite::create("square02_001.png");
@@ -817,6 +826,107 @@ bool RLCreatorLayer::init() {
       this->scheduleUpdate();
       this->setKeypadEnabled(true);
       return true;
+}
+
+void RLCreatorLayer::onUnknownButton(CCObject* sender) {
+      auto rng = rand() % 9;
+      DialogObject* dialogObj = nullptr;
+      // the yapp-a-ton
+      switch (rng) {
+            case 0:
+                  dialogObj = DialogObject::create(
+                      "Mechanic",
+                      "Shh... don't tell anyone about this but I think <cg>RubRub</c> <cr>hates</c> this mod!",
+                      39,
+                      .8f,
+                      false,
+                      ccWHITE);
+                  break;
+            case 1:
+                  dialogObj = DialogObject::create(
+                      "Mechanic",
+                      "Do you hate the <cg>RobTop's</c> <cr>rating system</c>? Me too... Let's keep this between us.",
+                      39,
+                      .8f,
+                      false,
+                      ccWHITE);
+                  break;
+            case 2:
+                  dialogObj = DialogObject::create(
+                      "Mechanic",
+                      "Psst... Want to know a secret? <cb>Rated Layouts</c> is actually <cl>better</c> than <cg>RobTop's</c> rating system!",
+                      39,
+                      .8f,
+                      false,
+                      ccWHITE);
+                  break;
+            case 3:
+                  dialogObj = DialogObject::create(
+                      "Mechanic",
+                      "I believe we need a <cg>decentralized</c> rating system. <cb>Rated Layouts</c> is the future!",
+                      39,
+                      .8f,
+                      false,
+                      ccWHITE);
+                  break;
+            case 4:
+                  dialogObj = DialogObject::create(
+                      "Mechanic",
+                      "Between you and me, I think <cg>RobTop</c> could learn a thing or two from <cb>Rated Layouts</c> rating system.",
+                      39,
+                      .8f,
+                      false,
+                      ccWHITE);
+                  break;
+            case 5:
+                  dialogObj = DialogObject::create(
+                      "Mechanic",
+                      "You know, <cb>Rated Layouts</c> is more than just a rating system; it's us <co>tired creators</c> gambling our <cr>sanity</c> to get a <cr><s250>SINGLE</s></c> <cy>mod sent!</c>",
+                      46,
+                      .8f,
+                      false,
+                      ccWHITE);
+                  break;
+            case 6:
+                  dialogObj = DialogObject::create(
+                      "Mechanic",
+                      "Who ever made this <cl>new rating system</c> is a <cg>genius</c>! Finally, you can get the <co>recognition</c> you deserve!",
+                      39,
+                      .8f,
+                      false,
+                      ccWHITE);
+                  break;
+            case 7:
+                  dialogObj = DialogObject::create(
+                      "Mechanic",
+                      "Make <cl>rate worthy</c> level, join a <cy>mod level request stream</c>, see <cr>100 levels queued</c>, get <cc>depressed</c>, repeat.",
+                      50,
+                      .8f,
+                      false,
+                      ccWHITE);
+                  break;
+            case 8:
+                  dialogObj = DialogObject::create(
+                      "Mechanic",
+                      "It's funny that <cb>Rated Layouts</c> actually has more than <cg>two</c> people who <cy>rate levels</c>. <cg>RobTop's</c> rating system has like... what, <cr>one?</c>",
+                      38,
+                      .8f,
+                      false,
+                      ccWHITE);
+            case 9:
+                  dialogObj = DialogObject::create(
+                      "Mechanic",
+                      "You know, sometimes I wonder if <cg>RobTop</c> even plays the entire level while rating levels. With <cb>Rated Layouts</c>, at least I know someone <cr>actually</c> plays my level before rating it!",
+                      49,
+                      .8f,
+                      false,
+                      ccWHITE);
+      }
+      if (dialogObj) {
+            auto dialog = DialogLayer::createDialogLayer(dialogObj, nullptr, 2);
+            dialog->addToMainScene();
+            dialog->animateInRandomSide();
+      }
 }
 
 void RLCreatorLayer::onInfoButton(CCObject* sender) {
