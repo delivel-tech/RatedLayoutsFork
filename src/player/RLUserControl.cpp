@@ -60,7 +60,11 @@ bool RLUserControl::setup() {
       auto applySprite = ButtonSprite::create("Apply", 1.f);
       m_applyButton = CCMenuItemSpriteExtra::create(applySprite, this, menu_selector(RLUserControl::onApplyChanges));
       m_applyButton->setPosition({m_mainLayer->getContentSize().width / 2, 0});
-      m_applyButton->setEnabled(false);
+      // spinner
+      m_applySpinner = LoadingSpinner::create(36.f);
+      m_applySpinner->setPosition({m_applyButton->getPosition()});
+      m_applySpinner->setVisible(false);
+      menu->addChild(m_applySpinner);
       menu->addChild(m_applyButton);
 
       m_mainLayer->addChild(menu);
@@ -113,13 +117,11 @@ void RLUserControl::onToggleChanged(CCObject* sender) {
       auto toggler = static_cast<CCMenuItemToggler*>(sender);
       bool priorState = toggler && toggler->isToggled();
       bool newState = !priorState;
-      if (m_applyButton) m_applyButton->setEnabled(true);
-      log::debug("User excluded {}", newState);
 }
 
 void RLUserControl::onApplyChanges(CCObject* sender) {
       bool desired = false;
-      if (m_excludedToggler) desired = m_excludedToggler->isToggled();
+      if (m_excludedToggler) desired |= m_excludedToggler->isToggled();
       if (desired == m_persistedExcluded) {
             Notification::create("No changes to apply", NotificationIcon::Info)->show();
             return;
@@ -142,6 +144,11 @@ void RLUserControl::onApplyChanges(CCObject* sender) {
       // disable UI while request is in-flight
       if (m_applyButton) m_applyButton->setEnabled(false);
       if (m_excludedToggler) m_excludedToggler->setEnabled(false);
+      if (m_applySpinner) {
+            m_applySpinner->setVisible(true);
+            m_applyButton->setEnabled(false);
+            m_applyButton->setVisible(false);
+      }
 
       auto postReq = web::WebRequest();
       postReq.bodyJSON(jsonBody);
@@ -155,6 +162,7 @@ void RLUserControl::onApplyChanges(CCObject* sender) {
             // re-enable UI regardless
             if (thisRef->m_excludedToggler) thisRef->m_excludedToggler->setEnabled(true);
             if (thisRef->m_applyButton) thisRef->m_applyButton->setEnabled(true);
+            if (thisRef->m_applySpinner) thisRef->m_applySpinner->setVisible(false);
 
             if (!response->ok()) {
                   log::warn("setUser returned non-ok status: {}", response->code());
@@ -166,6 +174,7 @@ void RLUserControl::onApplyChanges(CCObject* sender) {
                         thisRef->m_isInitializing = false;
                   }
                   if (thisRef->m_applyButton) thisRef->m_applyButton->setEnabled(false);
+                  if (thisRef->m_applySpinner) thisRef->m_applySpinner->setVisible(false);
                   return;
             }
 
@@ -179,6 +188,7 @@ void RLUserControl::onApplyChanges(CCObject* sender) {
                         thisRef->m_isInitializing = false;
                   }
                   if (thisRef->m_applyButton) thisRef->m_applyButton->setEnabled(false);
+                  if (thisRef->m_applySpinner) thisRef->m_applySpinner->setVisible(false);
                   return;
             }
 

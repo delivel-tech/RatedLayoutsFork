@@ -14,6 +14,7 @@ class RLUserControl : public geode::Popup<> {
       int m_targetAccountId = 0;
       CCMenuItemToggler* m_excludedToggler = nullptr;
       CCMenuItemSpriteExtra* m_applyButton = nullptr;
+      LoadingSpinner* m_applySpinner = nullptr;
       bool m_isInitializing = false;
       bool m_persistedExcluded = false;
       void onApplyChanges(CCObject* sender);
