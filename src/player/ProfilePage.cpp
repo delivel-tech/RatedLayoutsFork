@@ -2,6 +2,8 @@
 #include <Geode/modify/ProfilePage.hpp>
 #include <argon/argon.hpp>
 
+#include "RLUserControl.hpp"
+
 using namespace geode::prelude;
 
 class $modify(RLProfilePage, ProfilePage) {
@@ -9,6 +11,7 @@ class $modify(RLProfilePage, ProfilePage) {
             CCLabelBMFont* blueprintStarsCount = nullptr;
             CCLabelBMFont* layoutPointsCount = nullptr;
             int role = 0;
+            int accountId = 0;
       };
 
       bool init(int accountID, bool ownProfile) {
@@ -109,6 +112,7 @@ class $modify(RLProfilePage, ProfilePage) {
 
       void fetchProfileData(int accountId) {
             log::info("Fetching profile data for account ID: {}", accountId);
+            m_fields->accountId = accountId;
 
             auto statsMenu = m_mainLayer->getChildByID("stats-menu");
 
@@ -244,6 +248,23 @@ class $modify(RLProfilePage, ProfilePage) {
 
                   statsMenu->updateLayout();
 
+                  // add a user manage button if the user accessing it is a mod or an admin
+                  if (Mod::get()->getSavedValue<int>("role", 0) >= 1) {
+                        auto leftMenu = static_cast<CCMenu*>(
+                            pageRef->m_mainLayer->getChildByIDRecursive("left-menu"));
+                        if (leftMenu && !leftMenu->getChildByID("rl-user-manage")) {
+                              auto hammerSprite = CCSprite::create("rlhammerIcon.png"_spr);
+                              auto circleButtonSprite = CircleButtonSprite::create(
+                                  hammerSprite, CircleBaseColor::DarkAqua, CircleBaseSize::Small);
+                              circleButtonSprite->setScale(0.875f);
+                              auto userButton = CCMenuItemSpriteExtra::create(
+                                  circleButtonSprite, pageRef, menu_selector(RLProfilePage::onUserManage));
+                              userButton->setID("rl-user-manage");
+                              leftMenu->addChild(userButton);
+                              leftMenu->updateLayout();
+                        }
+                  }
+
                   // only set saved data if you own the profile
                   if (pageRef->m_ownProfile) {
                         Mod::get()->setSavedValue("role", pageRef->m_fields->role);
@@ -251,6 +272,11 @@ class $modify(RLProfilePage, ProfilePage) {
 
                   pageRef->loadBadgeFromUserInfo();
             });
+      }
+      void onUserManage(CCObject* sender) {
+            int accountId = m_fields->accountId;
+            auto userControl = RLUserControl::create(accountId);
+            userControl->show();
       }
       // badge
       void loadPageFromUserInfo(GJUserScore* a2) {
