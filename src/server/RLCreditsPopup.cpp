@@ -96,10 +96,26 @@ bool RLCreditsPopup::setup() {
 
                       tableCell->addChild(label);
 
-                      // divider line at bottom of header
+                      // divider lines for header
+                      const float contentW = tableCell->getContentSize().width;
+                      const float contentH = tableCell->getContentSize().height;
+                      const float dividerH = 1.f;  // thin line
+                      const float halfDivider = dividerH / 2.f;
+                      const float topY = contentH - halfDivider;
+                      const float bottomY = halfDivider;
+
+                      if (content->getChildren()->count() > 0) {
+                            auto headerTopDivider = CCSprite::create();
+                            headerTopDivider->setTextureRect(CCRectMake(0, 0, contentW, dividerH));
+                            headerTopDivider->setPosition({contentW / 2.f, topY});
+                            headerTopDivider->setColor({0, 0, 0});
+                            headerTopDivider->setOpacity(80);
+                            tableCell->addChild(headerTopDivider, 2);
+                      }
+
                       auto headerDivider = CCSprite::create();
-                      headerDivider->setTextureRect(CCRectMake(0, 0, 340.f, 1.f));
-                      headerDivider->setPosition({170.f, 1.f});
+                      headerDivider->setTextureRect(CCRectMake(0, 0, contentW, dividerH));
+                      headerDivider->setPosition({contentW / 2.f, bottomY});
                       headerDivider->setColor({0, 0, 0});
                       headerDivider->setOpacity(80);
                       tableCell->addChild(headerDivider, 2);
@@ -151,14 +167,6 @@ bool RLCreditsPopup::setup() {
                       accountButton->setAnchorPoint({0.f, 0.5f});
                       menu->addChild(accountButton);
                       cell->addChild(menu);
-
-                      // divider line at bottom of player cell
-                      auto divider = CCSprite::create();
-                      divider->setTextureRect(CCRectMake(0, 0, 340.f, 1.f));
-                      divider->setPosition({170.f, 1.f});
-                      divider->setColor({0, 0, 0});
-                      divider->setOpacity(80);
-                      cell->addChild(divider, 2);
 
                       content->addChild(cell);
                 };
