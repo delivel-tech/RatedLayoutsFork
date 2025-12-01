@@ -1,0 +1,189 @@
+#include "RLCreditsPopup.hpp"
+
+#include <Geode/modify/ProfilePage.hpp>
+
+using namespace geode::prelude;
+
+RLCreditsPopup* RLCreditsPopup::create() {
+      auto ret = new RLCreditsPopup();
+
+      if (ret && ret->initAnchored(380.f, 250.f, "GJ_square01.png")) {
+            ret->autorelease();
+            return ret;
+      }
+
+      CC_SAFE_DELETE(ret);
+      return nullptr;
+};
+
+bool RLCreditsPopup::setup() {
+      setTitle("Rated Layout Credits");
+
+      auto scrollLayer = ScrollLayer::create({340.f, 195.f});
+      scrollLayer->setPosition({20.f, 23.f});
+      m_mainLayer->addChild(scrollLayer);
+      addListBorders(m_mainLayer, {m_mainLayer->getContentSize().width / 2, m_mainLayer->getContentSize().height / 2 - 5.f}, {340.f, 195.f});
+      m_scrollLayer = scrollLayer;
+
+      // create spinner
+      auto contentLayer = m_scrollLayer->m_contentLayer;
+      if (contentLayer) {
+            auto layout = ColumnLayout::create();
+            contentLayer->setLayout(layout);
+            layout->setGap(0.f);
+            layout->setAutoGrowAxis(0.f);
+            layout->setAxisReverse(true);
+
+            auto spinner = LoadingSpinner::create(48.f);
+            spinner->setPosition(contentLayer->getContentSize() / 2);
+            contentLayer->addChild(spinner);
+            m_spinner = spinner;
+      }
+
+      // Fetch mod players
+      web::WebRequest()
+          .get("https://gdrate.arcticwoof.xyz/getMod")
+          .listen([this](web::WebResponse* response) {
+                if (!response || !response->ok()) {
+                      log::warn("getMod returned non-ok status: {}", response ? response->code() : -1);
+                      if (m_spinner) {
+                            m_spinner->removeFromParent();
+                            m_spinner = nullptr;
+                      }
+                      Notification::create("Failed to fetch mod players", NotificationIcon::Error)->show();
+                      return;
+                }
+
+                auto jsonRes = response->json();
+                if (!jsonRes) {
+                      log::warn("Failed to parse mod players JSON");
+                      if (m_spinner) {
+                            m_spinner->removeFromParent();
+                            m_spinner = nullptr;
+                      }
+                      Notification::create("Invalid server response", NotificationIcon::Error)->show();
+                      return;
+                }
+
+                auto json = jsonRes.unwrap();
+                bool success = json["success"].asBool().unwrapOrDefault();
+                if (!success) {
+                      log::warn("Server returned success=false for getMod");
+                      if (m_spinner) {
+                            m_spinner->removeFromParent();
+                            m_spinner = nullptr;
+                      }
+                      return;
+                }
+
+                // populate players
+                auto content = m_scrollLayer->m_contentLayer;
+                if (!content) return;
+                if (m_spinner) {
+                      m_spinner->removeFromParent();
+                      m_spinner = nullptr;
+                }
+                content->removeAllChildrenWithCleanup(true);
+
+                auto addHeader = [&](std::string_view text) {  // header yesz
+                      auto tableCell = TableViewCell::create();
+                      tableCell->setContentSize({340.f, 30.f});
+                      auto label = CCLabelBMFont::create(std::string{text}.c_str(), "bigFont.fnt");
+                      label->setScale(0.6f);
+                      label->setAnchorPoint({0.5f, 0.5f});
+                      // center the label directly
+                      label->setPosition({340.f / 2.f, 15.f});
+
+                      tableCell->addChild(label);
+
+                      // divider line at bottom of header
+                      auto headerDivider = CCSprite::create();
+                      headerDivider->setTextureRect(CCRectMake(0, 0, 340.f, 1.f));
+                      headerDivider->setPosition({170.f, 1.f});
+                      headerDivider->setColor({0, 0, 0});
+                      headerDivider->setOpacity(80);
+                      tableCell->addChild(headerDivider, 2);
+                      content->addChild(tableCell);
+                };
+
+                auto addPlayer = [&](const matjson::Value& userVal, bool isAdmin) {
+                      if (!userVal.isObject()) return;
+
+                      int accountId = userVal["accountId"].asInt().unwrapOrDefault();
+                      std::string username = userVal["username"].asString().unwrapOrDefault();
+                      int iconId = userVal["iconid"].asInt().unwrapOrDefault();
+                      int color1 = userVal["color1"].asInt().unwrapOrDefault();
+                      int color2 = userVal["color2"].asInt().unwrapOrDefault();
+                      int color3 = userVal["color3"].asInt().unwrapOrDefault();
+
+                      auto cell = TableViewCell::create();
+                      cell->setContentSize({340.f, 50.f});
+
+                      // color bg ass
+                      auto bgSprite = CCSprite::create();
+                      bgSprite->setTextureRect(CCRectMake(0, 0, 340.f, 50.f));
+                      bgSprite->setPosition({170.f, 25.f});
+                      if (isAdmin) {
+                            bgSprite->setColor({161, 88, 44});
+                      } else {
+                            bgSprite->setColor({194, 114, 62});
+                      }
+                      cell->addChild(bgSprite);
+
+                      auto gm = GameManager::sharedState();
+                      auto player = SimplePlayer::create(iconId);
+                      player->updatePlayerFrame(iconId, IconType::Cube);
+                      player->setColors(gm->colorForIdx(color1), gm->colorForIdx(color2));
+                      if (color3 != 0) player->setGlowOutline(gm->colorForIdx(color3));
+                      player->setPosition({40.f, 25.f});
+                      cell->addChild(player);
+
+                      auto nameLabel = CCLabelBMFont::create(username.c_str(), "goldFont.fnt");
+                      nameLabel->setAnchorPoint({0.f, 0.5f});
+                      nameLabel->setScale(0.8f);
+                      nameLabel->setPosition({80.f, 25.f});
+
+                      auto menu = CCMenu::create();
+                      menu->setPosition({0, 0});
+                      auto accountButton = CCMenuItemSpriteExtra::create(nameLabel, this, menu_selector(RLCreditsPopup::onAccountClicked));
+                      accountButton->setTag(accountId);
+                      accountButton->setPosition({70.f, 25.f});
+                      accountButton->setAnchorPoint({0.f, 0.5f});
+                      menu->addChild(accountButton);
+                      cell->addChild(menu);
+
+                      // divider line at bottom of player cell
+                      auto divider = CCSprite::create();
+                      divider->setTextureRect(CCRectMake(0, 0, 340.f, 1.f));
+                      divider->setPosition({170.f, 1.f});
+                      divider->setColor({0, 0, 0});
+                      divider->setOpacity(80);
+                      cell->addChild(divider, 2);
+
+                      content->addChild(cell);
+                };
+
+                if (json.contains("admins") && json["admins"].isArray()) {
+                      addHeader("Layout Admins");
+                      auto admins = json["admins"].asArray().unwrap();
+                      for (auto& val : admins) addPlayer(val, true);
+                }
+
+                if (json.contains("moderators") && json["moderators"].isArray()) {
+                      addHeader("Layout Moderators");
+                      auto mods = json["moderators"].asArray().unwrap();
+                      for (auto& val : mods) addPlayer(val, false);
+                }
+
+                content->updateLayout();
+                m_scrollLayer->scrollToTop();
+          });
+
+      return true;
+}
+
+void RLCreditsPopup::onAccountClicked(CCObject* sender) {
+      auto button = static_cast<CCMenuItem*>(sender);
+      int accountId = button->getTag();
+      ProfilePage::create(accountId, false)->show();
+}

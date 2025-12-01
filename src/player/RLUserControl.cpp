@@ -117,6 +117,9 @@ void RLUserControl::onToggleChanged(CCObject* sender) {
       auto toggler = static_cast<CCMenuItemToggler*>(sender);
       bool priorState = toggler && toggler->isToggled();
       bool newState = !priorState;
+
+      bool differs = (newState != m_persistedExcluded);
+      if (m_applyButton) m_applyButton->setEnabled(differs);
 }
 
 void RLUserControl::onApplyChanges(CCObject* sender) {
@@ -163,6 +166,7 @@ void RLUserControl::onApplyChanges(CCObject* sender) {
             if (thisRef->m_excludedToggler) thisRef->m_excludedToggler->setEnabled(true);
             if (thisRef->m_applyButton) thisRef->m_applyButton->setEnabled(true);
             if (thisRef->m_applySpinner) thisRef->m_applySpinner->setVisible(false);
+            if (thisRef->m_applyButton) thisRef->m_applyButton->setVisible(true);
 
             if (!response->ok()) {
                   log::warn("setUser returned non-ok status: {}", response->code());
@@ -174,6 +178,7 @@ void RLUserControl::onApplyChanges(CCObject* sender) {
                         thisRef->m_isInitializing = false;
                   }
                   if (thisRef->m_applyButton) thisRef->m_applyButton->setEnabled(false);
+                  if (thisRef->m_applyButton) thisRef->m_applyButton->setVisible(true);
                   if (thisRef->m_applySpinner) thisRef->m_applySpinner->setVisible(false);
                   return;
             }
@@ -188,6 +193,7 @@ void RLUserControl::onApplyChanges(CCObject* sender) {
                         thisRef->m_isInitializing = false;
                   }
                   if (thisRef->m_applyButton) thisRef->m_applyButton->setEnabled(false);
+                  if (thisRef->m_applyButton) thisRef->m_applyButton->setVisible(true);
                   if (thisRef->m_applySpinner) thisRef->m_applySpinner->setVisible(false);
                   return;
             }

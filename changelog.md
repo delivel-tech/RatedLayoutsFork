@@ -1,3 +1,8 @@
+# v0.1.8-beta.1
+
+- Added User logs and control panel (for moderators and admins)
+- Added credits or layout moderators and admins list
+
 # v0.1.7-beta.1
 
 - Added Info Button at the Rated Layouts Creator Layer that explains about Rated Layouts and its features.
