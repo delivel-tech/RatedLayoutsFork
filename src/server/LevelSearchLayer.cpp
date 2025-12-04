@@ -85,7 +85,7 @@ class $modify(RLLevelSearchLayer, LevelSearchLayer) {
       auto oldSprite3 = typeinfo_cast<CCSprite *>(
           allRatedButtonSprite->getChildren()->objectAtIndex(1));
       if (oldSprite3) {
-        auto newSprite = CCSprite::create("rlStarIcon.png"_spr);
+        auto newSprite = CCSprite::create("rlStarIconMed.png"_spr);
         oldSprite3->setVisible(false);
         newSprite->setPosition(oldSprite3->getPosition());
         newSprite->setScale(0.8f);

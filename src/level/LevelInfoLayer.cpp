@@ -315,6 +315,13 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer) {
                                     }
                               } else {
                                     log::info("Reward animation disabled");
+                                    Notification::create("Received " +
+                                                             numToString(difficulty) + " stars!",
+                                                         CCSprite::create("rlStarIconMed.png"_spr), 2.f)
+                                        ->show();
+                                    FMODAudioEngine::sharedEngine()->playEffect(
+                                        // @geode-ignore(unknown-resource)
+                                        "gold02.ogg");
                               }
                         } else {
                               log::warn("level already completed and rewarded beforehand");

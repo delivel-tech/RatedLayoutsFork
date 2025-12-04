@@ -128,18 +128,18 @@ class $modify(EndLevelLayer) {
                               // make the stars reward pop when u complete the level
                               auto bigStarSprite =
                                   CCSprite::create("rlStarIconBig.png"_spr);
-                              bigStarSprite->setScale(1.2f);
+                              bigStarSprite->setScale(1.f);
                               bigStarSprite->setPosition(
                                   {endLayerRef->m_mainLayer->getContentSize().width / 2 +
                                        135,
                                    endLayerRef->m_mainLayer->getContentSize().height /
                                        2});
                               bigStarSprite->setOpacity(0);
-                              bigStarSprite->setScale(0.5f);
+                              bigStarSprite->setScale(1.2f);
                               endLayerRef->m_mainLayer->addChild(bigStarSprite);
 
                               // star animation lol
-                              auto scaleAction = CCScaleTo::create(1.f, .8f);
+                              auto scaleAction = CCScaleBy::create(.8f, .8f);
                               auto bounceAction = CCEaseBounceOut::create(scaleAction);
                               auto fadeAction = CCFadeIn::create(0.5f);
                               auto spawnAction =
@@ -186,6 +186,13 @@ class $modify(EndLevelLayer) {
                                     }
                               } else {
                                     log::info("Reward animation disabled");
+                                    Notification::create("Received " +
+                                                             numToString(starReward) + " stars!",
+                                                         CCSprite::create("rlStarIconMed.png"_spr), 2.f)
+                                        ->show();
+                                    FMODAudioEngine::sharedEngine()->playEffect(
+                                        // @geode-ignore(unknown-resource)
+                                        "gold02.ogg");
                               }
                         } else if (!success && responseStars == 0) {
                               Notification::create(

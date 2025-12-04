@@ -1,6 +1,8 @@
 # v0.1.9-beta.1
 
-
+- Fixed the Star Reward animation on the end level layer.
+- Added Notification and sound effect when claiming stars from the level info layer if the reward animation is disabled.
+- Minor fixes.
 
 # v0.1.8-beta.1
 
