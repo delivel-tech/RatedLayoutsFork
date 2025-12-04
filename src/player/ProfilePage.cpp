@@ -280,7 +280,16 @@ class $modify(RLProfilePage, ProfilePage) {
                   return;
             }
 
-            if (m_fields->role == 1) {
+            if (m_accountID == 7689052) {  // ArcticWoof exception
+                  if (userNameMenu->getChildByID("rl-owner-badge")) {
+                        return;
+                  }
+                  auto ownerBadgeSprite = CCSprite::create("rlBadgeOwner.png"_spr);
+                  auto ownerBadgeButton = CCMenuItemSpriteExtra::create(
+                      ownerBadgeSprite, this, menu_selector(RLProfilePage::onOwnerBadge));
+                  ownerBadgeButton->setID("rl-owner-badge");
+                  userNameMenu->addChild(ownerBadgeButton);
+            } else if (m_fields->role == 1) {
                   if (userNameMenu->getChildByID("rl-mod-badge")) {
                         return;
                   }
@@ -293,27 +302,25 @@ class $modify(RLProfilePage, ProfilePage) {
                   userNameMenu->addChild(modBadgeButton);
                   userNameMenu->updateLayout();
             } else if (m_fields->role == 2) {
-                  // Check if badge already exists
                   if (userNameMenu->getChildByID("rl-admin-badge")) {
                         log::info("Admin badge already exists, skipping creation");
                         return;
                   }
-
                   auto adminBadgeSprite = CCSprite::create("rlBadgeAdmin.png"_spr);
                   auto adminBadgeButton = CCMenuItemSpriteExtra::create(
                       adminBadgeSprite, this, menu_selector(RLProfilePage::onAdminBadge));
-
                   adminBadgeButton->setID("rl-admin-badge");
                   userNameMenu->addChild(adminBadgeButton);
                   userNameMenu->updateLayout();
             }
+            userNameMenu->updateLayout();
       }
 
       void onModBadge(CCObject* sender) {
             FLAlertLayer::create(
                 "Layout Moderator",
                 "This user can <cj>suggest layout levels</c> for <cl>Rated "
-                "Layouts</c> to the <cr>Layout Admins</c>.",
+                "Layouts</c> to the <cr>Layout Admins</c>. They have the ability to <co>moderate the leaderboards</c>.",
                 "OK")
                 ->show();
       }
@@ -322,8 +329,15 @@ class $modify(RLProfilePage, ProfilePage) {
             FLAlertLayer::create(
                 "Layout Administrator",
                 "This user can <cj>rate layout levels</c> for <cl>Rated "
-                "Layouts</c>. They can change the <cy>featured ranking on the "
+                "Layouts</c>. They have the same power as <cg>Moderators</c> but including the ability to change the <cy>featured ranking on the "
                 "featured layout levels.</c>",
+                "OK")
+                ->show();
+      }
+      void onOwnerBadge(CCObject* sender) {
+            FLAlertLayer::create(
+                "Rated Layout Creator",
+                "<cf>ArcticWoof</c> is the <ca>Creator and Developer</c> of <cl>Rated Layouts</c> Geode Mod.\nHe controls and manages everything within <cl>Rated Layouts</c>, including updates and adding new features as well as the ability to <cg>promote users to Layout Moderators or Administrators</c>.",
                 "OK")
                 ->show();
       }
