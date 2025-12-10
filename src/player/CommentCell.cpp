@@ -3,6 +3,53 @@
 
 using namespace geode::prelude;
 
+// helper functions for caching user roles cuz caching is good.
+static std::string getUserRoleCachePath() {
+      auto saveDir = dirs::getModsSaveDir();
+      return geode::utils::string::pathToString(saveDir / "user_role_cache.json");
+}
+
+static std::optional<int> getCachedUserRole(int accountId) {
+      auto cachePath = getUserRoleCachePath();
+      auto data = utils::file::readString(cachePath);
+      if (!data) return std::nullopt;
+
+      auto json = matjson::parse(data.unwrap());
+      if (!json) return std::nullopt;
+
+      auto root = json.unwrap();
+      if (root.isObject() && root.contains(fmt::format("{}", accountId))) {
+            return root[fmt::format("{}", accountId)].asInt().unwrapOrDefault();
+      }
+      return std::nullopt;
+}
+
+static void cacheUserRole(int accountId, int role) {
+      auto saveDir = dirs::getModsSaveDir();
+      auto createDirResult = utils::file::createDirectory(saveDir);
+      if (!createDirResult) {
+            log::warn("Failed to create save directory for user role cache");
+            return;
+      }
+
+      auto cachePath = getUserRoleCachePath();
+
+      matjson::Value root = matjson::Value::object();
+      auto existingData = utils::file::readString(cachePath);
+      if (existingData) {
+            auto parsed = matjson::parse(existingData.unwrap());
+            if (parsed) root = parsed.unwrap();
+      }
+
+      root[fmt::format("{}", accountId)] = role;
+
+      auto jsonString = root.dump();
+      auto writeResult = utils::file::writeString(geode::utils::string::pathToString(cachePath), jsonString);
+      if (writeResult) {
+            log::debug("Cached user role {} for account ID: {}", role, accountId);
+      }
+}
+
 class $modify(RLCommentCell, CommentCell) {
       struct Fields {
             int role = 0;
@@ -16,7 +63,19 @@ class $modify(RLCommentCell, CommentCell) {
                   return;
             }
 
-            fetchUserRole(comment->m_accountID);
+            // check cache first
+            auto cachedRole = getCachedUserRole(comment->m_accountID);
+            if (cachedRole) {
+                  m_fields->role = cachedRole.value();
+                  log::debug("Loaded cached role {} for user {}", m_fields->role, comment->m_accountID);
+                  loadBadgeForComment(comment->m_accountID);
+                  return;
+            }
+
+            // disable comment fetching if enabled
+            if (!Mod::get()->getSettingValue<bool>("compatibilityMode")) {
+                  fetchUserRole(comment->m_accountID);
+            }
       }
 
       void applyCommentTextColor(int accountId) {
@@ -79,6 +138,8 @@ class $modify(RLCommentCell, CommentCell) {
                   auto json = jsonRes.unwrap();
                   int role = json["role"].asInt().unwrapOrDefault();
                   cellRef->m_fields->role = role;
+
+                  cacheUserRole(accountId, role);
 
                   log::debug("User comment role: {}", role);
 

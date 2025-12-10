@@ -11,8 +11,7 @@ using namespace geode::prelude;
 // get the cache file path
 static std::string getCachePath() {
       auto saveDir = dirs::getModsSaveDir();
-      return (saveDir / "level_ratings_cache.json")
-          .string();  // stored outside the save dir, idk why
+      return utils::string::pathToString(saveDir / "level_ratings_cache.json");  // stored outside the save dir, idk why
 }
 
 // load cached data for a level

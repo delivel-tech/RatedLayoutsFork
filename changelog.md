@@ -1,3 +1,8 @@
+# v0.2.1-beta.1
+
+- Added fetched comments caching to reduce server requests and included in the disabled fetch requests option.
+- Minor fixes.
+
 # v0.2.0-beta.1
 
 - Added an option to disable all fetch requests from the server to get the level rating data.

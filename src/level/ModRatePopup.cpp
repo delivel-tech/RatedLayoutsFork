@@ -159,7 +159,7 @@ bool ModRatePopup::setup(std::string title, GJGameLevel *level) {
   m_mainLayer->addChild(m_difficultyContainer);
 
   // featured score textbox (created conditionally based on role)
-  m_featuredScoreInput = geode::TextInput::create(100.f, "Score");
+  m_featuredScoreInput = TextInput::create(100.f, "Score");
   m_featuredScoreInput->setPosition({300.f, 40.f});
   m_featuredScoreInput->setVisible(false);
   m_featuredScoreInput->setID("featured-score-input");
@@ -285,7 +285,7 @@ void ModRatePopup::onSubmitButton(CCObject *sender) {
 
       // delete cached level to force refresh on next view
       auto cachePath = dirs::getModsSaveDir() / "level_ratings_cache.json";
-      auto existingData = utils::file::readString(cachePath.string());
+      auto existingData = utils::file::readString(utils::string::pathToString(cachePath));
       if (existingData) {
         auto parsed = matjson::parse(existingData.unwrap());
         if (parsed) {
@@ -295,8 +295,8 @@ void ModRatePopup::onSubmitButton(CCObject *sender) {
             auto result = root.erase(key);
           }
           auto jsonString = root.dump();
-          auto writeResult =
-              utils::file::writeString(cachePath.string(), jsonString);
+            auto writeResult =
+              utils::file::writeString(utils::string::pathToString(cachePath), jsonString);
           log::debug("Deleted level ID {} from cache after submission",
                      this->m_levelId);
         }
@@ -367,7 +367,7 @@ void ModRatePopup::onUnrateButton(CCObject *sender) {
 
       // Delete cached level to force refresh on next view
       auto cachePath = dirs::getModsSaveDir() / "level_ratings_cache.json";
-      auto existingData = utils::file::readString(cachePath.string());
+      auto existingData = utils::file::readString(utils::string::pathToString(cachePath));
       if (existingData) {
         auto parsed = matjson::parse(existingData.unwrap());
         if (parsed) {
@@ -377,8 +377,8 @@ void ModRatePopup::onUnrateButton(CCObject *sender) {
             auto result = root.erase(key);
           }
           auto jsonString = root.dump();
-          auto writeResult =
-              utils::file::writeString(cachePath.string(), jsonString);
+            auto writeResult =
+              utils::file::writeString(utils::string::pathToString(cachePath), jsonString);
           log::debug("Deleted level ID {} from cache after unrate",
                      this->m_levelId);
         }
