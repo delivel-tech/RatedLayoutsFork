@@ -334,6 +334,21 @@ bool RLSearchLayer::init() {
       awardedItem->setID("awarded-toggle");
       m_awardedItem = awardedItem;
       optionsMenu->addChild(awardedItem);
+
+      // sorting toggles - descending and ascending (mutually exclusive)
+      auto descendingSpr = ButtonSprite::create("Descending", "goldFont.fnt", "GJ_button_01.png");
+      auto descendingItem = CCMenuItemSpriteExtra::create(descendingSpr, this, menu_selector(RLSearchLayer::onDescendingToggle));
+      descendingItem->setScale(1.0f);
+      descendingItem->setID("descending-toggle");
+      m_descendingItem = descendingItem;
+      optionsMenu->addChild(descendingItem);
+
+      auto ascendingSpr = ButtonSprite::create("Ascending", "goldFont.fnt", "GJ_button_01.png");
+      auto ascendingItem = CCMenuItemSpriteExtra::create(ascendingSpr, this, menu_selector(RLSearchLayer::onAscendingToggle));
+      ascendingItem->setScale(1.0f);
+      ascendingItem->setID("ascending-toggle");
+      m_ascendingItem = ascendingItem;
+      optionsMenu->addChild(ascendingItem);
       optionsMenu->updateLayout();
 
       this->addChild(m_difficultyFilterMenu);
@@ -373,6 +388,8 @@ void RLSearchLayer::onSearchButton(CCObject* sender) {
 
       int featuredParam = m_featuredActive ? 1 : 0;
       int awardedParam = m_awardedActive ? 1 : 0;
+      int descendingParam = m_descendingActive ? 1 : 0;
+      int ascendingParam = m_ascendingActive ? 1 : 0;
       std::string queryParam = "";
       if (m_searchInput) queryParam = m_searchInput->getString();
 
@@ -380,8 +397,11 @@ void RLSearchLayer::onSearchButton(CCObject* sender) {
       if (!difficultyParam.empty()) req.param("difficulty", difficultyParam);
       req.param("featured", numToString(featuredParam));
       if (!queryParam.empty()) req.param("query", queryParam);
-      // include awarded flag (0 or 1)
+      // query params
       req.param("awarded", numToString(awardedParam));
+      req.param("descending", numToString(descendingParam));
+      req.param("ascending", numToString(ascendingParam));
+
       req.get("https://gdrate.arcticwoof.xyz/search").listen([this](web::WebResponse* res) {
             if (!res || !res->ok()) {
                   Notification::create("Search request failed", NotificationIcon::Error)->show();
@@ -439,6 +459,44 @@ void RLSearchLayer::onAwardedToggle(CCObject* sender) {
       auto btn = static_cast<ButtonSprite*>(normalNode);
       if (btn) {
             btn->updateBGImage(m_awardedActive ? "GJ_button_02.png" : "GJ_button_01.png");
+      }
+}
+
+void RLSearchLayer::onDescendingToggle(CCObject* sender) {
+      auto item = static_cast<CCMenuItemSpriteExtra*>(sender);
+      if (!item) return;
+      // Toggle descending; when enabling descending, disable ascending
+      m_descendingActive = !m_descendingActive;
+      if (m_descendingActive && m_ascendingActive) {
+            m_ascendingActive = false;
+            if (m_ascendingItem) {
+                  auto ascNormal = static_cast<ButtonSprite*>(m_ascendingItem->getNormalImage());
+                  if (ascNormal) ascNormal->updateBGImage("GJ_button_01.png");
+            }
+      }
+      auto normalNode = item->getNormalImage();
+      auto btn = static_cast<ButtonSprite*>(normalNode);
+      if (btn) {
+            btn->updateBGImage(m_descendingActive ? "GJ_button_02.png" : "GJ_button_01.png");
+      }
+}
+
+void RLSearchLayer::onAscendingToggle(CCObject* sender) {
+      auto item = static_cast<CCMenuItemSpriteExtra*>(sender);
+      if (!item) return;
+      // Toggle ascending; when enabling ascending, disable descending
+      m_ascendingActive = !m_ascendingActive;
+      if (m_ascendingActive && m_descendingActive) {
+            m_descendingActive = false;
+            if (m_descendingItem) {
+                  auto descNormal = static_cast<ButtonSprite*>(m_descendingItem->getNormalImage());
+                  if (descNormal) descNormal->updateBGImage("GJ_button_01.png");
+            }
+      }
+      auto normalNode = item->getNormalImage();
+      auto btn = static_cast<ButtonSprite*>(normalNode);
+      if (btn) {
+            btn->updateBGImage(m_ascendingActive ? "GJ_button_02.png" : "GJ_button_01.png");
       }
 }
 

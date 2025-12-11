@@ -32,6 +32,8 @@ class RLSearchLayer : public CCLayer {
       RowLayout* m_optionsLayout = nullptr;
       CCMenuItemSpriteExtra* m_featuredItem = nullptr;
       CCMenuItemSpriteExtra* m_awardedItem = nullptr;
+      CCMenuItemSpriteExtra* m_descendingItem = nullptr;
+      CCMenuItemSpriteExtra* m_ascendingItem = nullptr;
 
       // difficulty filter buttons
       CCMenu* m_difficultyFilterMenu = nullptr;
@@ -47,6 +49,10 @@ class RLSearchLayer : public CCLayer {
       bool m_demonModeActive = false;
       bool m_featuredActive = false;
       bool m_awardedActive = false;
+      bool m_descendingActive = false;
+      bool m_ascendingActive = false;
+      void onAscendingToggle(CCObject* sender);
+      void onDescendingToggle(CCObject* sender);
       void onAwardedToggle(CCObject* sender);
       void onFeaturedToggle(CCObject* sender);
       void onDemonToggle(CCObject* sender);
