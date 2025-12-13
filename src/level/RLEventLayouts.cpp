@@ -36,7 +36,7 @@ bool RLEventLayouts::setup() {
       m_eventMenu = CCLayer::create();
       m_eventMenu->setPosition({contentSize.width / 2, contentSize.height / 2});
 
-      float startY = contentSize.height - 50.f;
+      float startY = contentSize.height - 100.f;
       float rowSpacing = 80.f;
 
       std::vector<std::string> labels = {"Daily", "Weekly", "Monthly"};
@@ -68,32 +68,39 @@ bool RLEventLayouts::setup() {
             m_mainLayer->addChild(container);
 
             // Add a label for level title
-            auto levelNameLabel = CCLabelBMFont::create("Loading...", "bigFont.fnt");
-            levelNameLabel->setPosition({55.f, 40.f});
+            auto levelNameLabel = CCLabelBMFont::create("-", "bigFont.fnt");
+            levelNameLabel->setPosition({55.f, 43.f});
             levelNameLabel->setAnchorPoint({0.f, 0.5f});
-            levelNameLabel->setScale(0.6f);
+            levelNameLabel->setScale(0.5f);
             container->addChild(levelNameLabel);
             m_sections[i].levelNameLabel = levelNameLabel;
 
-            // creator label
-            auto creatorLabel = CCLabelBMFont::create("", "goldFont.fnt");
-            creatorLabel->setAnchorPoint({0.f, 0.5f});
-            creatorLabel->setScale(0.6f);
-            auto creatorItem = CCMenuItemSpriteExtra::create(creatorLabel, this, menu_selector(RLEventLayouts::onCreatorClicked));
-            creatorItem->setTag(0);
-            creatorItem->setAnchorPoint({0.f, 0.5f});
-            creatorItem->setPosition({55.f, 22.f});
             // create a menu for this creatorItem and add it to the container
             auto creatorMenu = CCMenu::create();
             creatorMenu->setPosition({0, 0});
+            creatorMenu->setContentSize(container->getContentSize());
+            // creator label
+            auto creatorLabel = CCLabelBMFont::create("By", "goldFont.fnt");
+            creatorLabel->setAnchorPoint({0.5f, 0.5f});
+            creatorLabel->setScale(0.6f);
+
+            auto creatorItem = CCMenuItemSpriteExtra::create(creatorLabel, this, menu_selector(RLEventLayouts::onCreatorClicked));
+            creatorItem->setTag(0);
+            creatorItem->setAnchorPoint({0.f, 0.5f});
+            creatorItem->setContentSize({100.f, 12.f});  // maybe have to preset this? cuz of the thingy bug wha
+            creatorItem->setPosition({55.f, 22.f});
+            creatorLabel->setPosition({0.f, creatorItem->getContentSize().height / 2.f});
+            creatorLabel->setAnchorPoint({0.f, 0.5f});
+
             creatorMenu->addChild(creatorItem);
             container->addChild(creatorMenu, 2);
             m_sections[i].creatorLabel = creatorLabel;
             m_sections[i].creatorButton = creatorItem;
 
             // timer label on right side
-            auto timerLabel = CCLabelBMFont::create("--:--:--:--", "goldFont.fnt");
-            timerLabel->setPosition({cellW - 30.f, 22.f});
+            std::vector<std::string> timerPrefixes = {"Next Daily in ", "Next Weekly in ", "Next Monthly in "};
+            auto timerLabel = CCLabelBMFont::create((timerPrefixes[i] + "--:--:--:--").c_str(), "goldFont.fnt");
+            timerLabel->setPosition({cellW - 5.f, 10.f});
             timerLabel->setAnchorPoint({1.f, 0.5f});
             timerLabel->setScale(0.3f);
             container->addChild(timerLabel);
@@ -143,6 +150,7 @@ bool RLEventLayouts::setup() {
                         auto creator = obj["creator"].as<std::string>().unwrapOrDefault();
                         auto difficulty = obj["difficulty"].as<int>().unwrapOrDefault();
                         auto accountId = obj["accountId"].as<int>().unwrapOrDefault();
+                        auto featured = obj["featured"].as<int>().unwrapOrDefault();
 
                         // update UI
                         auto sec = &selfRef->m_sections[idx];
@@ -150,16 +158,31 @@ bool RLEventLayouts::setup() {
                         auto nameLabel = sec->levelNameLabel;
                         auto creatorLabel = sec->creatorLabel;
                         if (nameLabel) nameLabel->setString(levelName.c_str());
-                        if (creatorLabel) creatorLabel->setString(creator.c_str());
+                        if (creatorLabel) creatorLabel->setString(("By " + creator).c_str());
                         if (sec->diff) {
                               sec->diff->updateDifficultyFrame(getDifficulty(difficulty), GJDifficultyName::Short);
+
+                              // featured/epic coin
+                              if (featured == 1 || featured == 2) {
+                                    sec->featured = featured;
+                                    const char* coinSprite = (featured == 1) ? "GJ_featuredCoin_001.png" : "GJ_epicCoin_001.png";
+                                    auto coinIcon = CCSprite::createWithSpriteFrameName(coinSprite);
+                                    if (coinIcon) {
+                                          coinIcon->setPosition({sec->diff->getContentSize().width - 5.f, sec->diff->getContentSize().height - 5.f});
+                                          coinIcon->setScale(0.6f);
+                                          coinIcon->setZOrder(10);
+                                          sec->diff->addChild(coinIcon);
+                                    }
+                              }
                         }
                         sec->accountId = accountId;
                         if (sec->creatorButton) {
                               sec->creatorButton->setTag(accountId);
                               sec->creatorButton->setPosition({55.f, 22.f});
+                              sec->creatorButton->setContentSize({creatorLabel->getContentSize().width * creatorLabel->getScaleX(), 12.f});
                         }
-                        if (sec->timerLabel) sec->timerLabel->setString(formatTime((long)sec->secondsLeft).c_str());
+                        std::vector<std::string> timerPrefixes = {"Next Daily in ", "Next Weekly in ", "Next Monthly in "};
+                        if (sec->timerLabel) sec->timerLabel->setString((timerPrefixes[idx] + formatTime((long)sec->secondsLeft)).c_str());
                   }
             });
       }
@@ -168,12 +191,13 @@ bool RLEventLayouts::setup() {
 }
 
 void RLEventLayouts::update(float dt) {
+      std::vector<std::string> timerPrefixes = {"Next Daily in ", "Next Weekly in ", "Next Monthly in "};
       for (int i = 0; i < 3; ++i) {
             auto& sec = m_sections[i];
             if (sec.secondsLeft <= 0) continue;
             sec.secondsLeft -= dt;
             if (sec.secondsLeft < 0) sec.secondsLeft = 0;
-            if (sec.timerLabel) sec.timerLabel->setString(formatTime((long)sec.secondsLeft).c_str());
+            if (sec.timerLabel) sec.timerLabel->setString((timerPrefixes[i] + formatTime((long)sec.secondsLeft)).c_str());
       }
 }
 

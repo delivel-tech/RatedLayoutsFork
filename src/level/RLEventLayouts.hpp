@@ -21,6 +21,7 @@ class RLEventLayouts : public geode::Popup<> {
             CCMenuItem* creatorButton = nullptr;
             int accountId = -1;
             int levelId = -1;
+            int featured = 0;
             time_t createdAt = 0;
             double secondsLeft = 0.0;
       };
