@@ -335,6 +335,14 @@ bool RLSearchLayer::init() {
       m_awardedItem = awardedItem;
       optionsMenu->addChild(awardedItem);
 
+      // epic button toggle
+      auto epicSpr = ButtonSprite::create("Epic", "goldFont.fnt", "GJ_button_01.png");
+      auto epicItem = CCMenuItemSpriteExtra::create(epicSpr, this, menu_selector(RLSearchLayer::onEpicToggle));
+      epicItem->setScale(1.0f);
+      epicItem->setID("epic-toggle");
+      m_epicItem = epicItem;
+      optionsMenu->addChild(epicItem);
+
       // sorting toggle - descending
       auto oldestSpr = ButtonSprite::create("Oldest", "goldFont.fnt", "GJ_button_01.png");
       auto oldestItem = CCMenuItemSpriteExtra::create(oldestSpr, this, menu_selector(RLSearchLayer::onOldestToggle));
@@ -343,6 +351,7 @@ bool RLSearchLayer::init() {
       m_oldestItem = oldestItem;
       optionsMenu->addChild(oldestItem);
       optionsMenu->updateLayout();
+
 
       // info button yay
       auto infoMenu = CCMenu::create();
@@ -404,6 +413,7 @@ void RLSearchLayer::onSearchButton(CCObject* sender) {
 
       int featuredParam = m_featuredActive ? 1 : 0;
       int awardedParam = m_awardedActive ? 1 : 0;
+      int epicParam = m_epicActive ? 1 : 0;
       int oldestParam = m_oldestActive ? 1 : 0;
       std::string queryParam = "";
       if (m_searchInput) queryParam = m_searchInput->getString();
@@ -411,6 +421,7 @@ void RLSearchLayer::onSearchButton(CCObject* sender) {
       auto req = web::WebRequest();
       if (!difficultyParam.empty()) req.param("difficulty", difficultyParam);
       req.param("featured", numToString(featuredParam));
+      req.param("epic", numToString(epicParam));
       if (!queryParam.empty()) req.param("query", queryParam);
       // query params
       req.param("awarded", numToString(awardedParam));
@@ -465,6 +476,14 @@ void RLSearchLayer::onFeaturedToggle(CCObject* sender) {
                   if (awardedNormal) awardedNormal->updateBGImage("GJ_button_01.png");
             }
       }
+      // featured is also mutually exclusive with epic
+      if (m_featuredActive && m_epicActive) {
+            m_epicActive = false;
+            if (m_epicItem) {
+                  auto epicNormal = static_cast<ButtonSprite*>(m_epicItem->getNormalImage());
+                  if (epicNormal) epicNormal->updateBGImage("GJ_button_01.png");
+            }
+      }
       // update visual state by changing the button's background image
       auto normalNode = item->getNormalImage();
       auto btn = static_cast<ButtonSprite*>(normalNode);
@@ -485,10 +504,47 @@ void RLSearchLayer::onAwardedToggle(CCObject* sender) {
                   if (featuredNormal) featuredNormal->updateBGImage("GJ_button_01.png");
             }
       }
+      // awarded is also mutually exclusive with epic
+      if (m_awardedActive && m_epicActive) {
+            m_epicActive = false;
+            if (m_epicItem) {
+                  auto epicNormal = static_cast<ButtonSprite*>(m_epicItem->getNormalImage());
+                  if (epicNormal) epicNormal->updateBGImage("GJ_button_01.png");
+            }
+      }
       auto normalNode = item->getNormalImage();
       auto btn = static_cast<ButtonSprite*>(normalNode);
       if (btn) {
             btn->updateBGImage(m_awardedActive ? "GJ_button_02.png" : "GJ_button_01.png");
+      }
+}
+
+void RLSearchLayer::onEpicToggle(CCObject* sender) {
+      auto item = static_cast<CCMenuItemSpriteExtra*>(sender);
+      if (!item) return;
+      m_epicActive = !m_epicActive;
+      // epic is mutually exclusive with featured and awarded
+      if (m_epicActive) {
+            if (m_featuredActive) {
+                  m_featuredActive = false;
+                  if (m_featuredItem) {
+                        auto featuredNormal = static_cast<ButtonSprite*>(m_featuredItem->getNormalImage());
+                        if (featuredNormal) featuredNormal->updateBGImage("GJ_button_01.png");
+                  }
+            }
+            if (m_awardedActive) {
+                  m_awardedActive = false;
+                  if (m_awardedItem) {
+                        auto awardedNormal = static_cast<ButtonSprite*>(m_awardedItem->getNormalImage());
+                        if (awardedNormal) awardedNormal->updateBGImage("GJ_button_01.png");
+                  }
+            }
+      }
+      // update visual state by changing the button's background image
+      auto normalNode = item->getNormalImage();
+      auto btn = static_cast<ButtonSprite*>(normalNode);
+      if (btn) {
+            btn->updateBGImage(m_epicActive ? "GJ_button_02.png" : "GJ_button_01.png");
       }
 }
 

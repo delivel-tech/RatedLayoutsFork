@@ -38,7 +38,6 @@ bool RLEventLayouts::setup() {
       // register instance
       g_eventLayoutsInstances.insert(this);
 
-      setTitle("Event Layouts");
       addSideArt(m_mainLayer, SideArt::All, SideArtStyle::PopupGold, false);
 
       auto contentSize = m_mainLayer->getContentSize();
@@ -46,8 +45,8 @@ bool RLEventLayouts::setup() {
       m_eventMenu = CCLayer::create();
       m_eventMenu->setPosition({contentSize.width / 2, contentSize.height / 2});
 
-      float startY = contentSize.height - 100.f;
-      float rowSpacing = 80.f;
+      float startY = contentSize.height - 87.f;
+      float rowSpacing = 90.f;
 
       std::vector<std::string> labels = {"Daily", "Weekly", "Monthly"};
       for (int i = 0; i < 3; ++i) {
@@ -76,6 +75,21 @@ bool RLEventLayouts::setup() {
             float startX = (contentSize.width - cellW) / 2.f;
             container->setPosition({startX, startY - i * rowSpacing});
             m_mainLayer->addChild(container);
+
+            // header label for the row
+            auto headerText = labels[i] + std::string(" Layout");
+            auto headerLabel = CCLabelBMFont::create(headerText.c_str(), "bigFont.fnt");
+            headerLabel->setScale(0.5f);
+            headerLabel->setAnchorPoint({0.5f, 0.f});
+            headerLabel->setPosition({cellW / 2.f, cellH + 2.f});
+            if (i == 0) {
+                  headerLabel->setColor({0, 200, 0});  // green
+            } else if (i == 1) {
+                  headerLabel->setColor({255, 200, 0});  // yellow
+            } else {
+                  headerLabel->setColor({150, 0, 255});  // purple
+            }
+            container->addChild(headerLabel, 3);
 
             // Add a label for level title
             auto levelNameLabel = CCLabelBMFont::create("-", "bigFont.fnt");
@@ -387,7 +401,7 @@ void RLEventLayouts::update(float dt) {
                                     }
                               }
                               // prevent repeated pushes
-                              auto scene = LevelInfoLayer::scene(level, true);
+                              auto scene = LevelInfoLayer::scene(level, false);
                               auto transitionFade = CCTransitionFade::create(0.5f, scene);
                               CCDirector::sharedDirector()->pushScene(transitionFade);
 
@@ -588,7 +602,7 @@ void RLEventLayouts::onPlayEvent(CCObject* sender) {
                   // If already downloaded, go directly to LevelInfoLayer
                   if (glm->hasDownloadedLevel(levelId)) {
                         restoreUIForLevel(levelId);
-                        auto scene = LevelInfoLayer::scene(level, true);
+                        auto scene = LevelInfoLayer::scene(level, false);
                         auto transitionFade = CCTransitionFade::create(0.5f, scene);
                         CCDirector::sharedDirector()->pushScene(transitionFade);
                         return;
@@ -652,7 +666,7 @@ void RLEventLayouts::onPlayEvent(CCObject* sender) {
                                     }
                               }
                               m_pendingDownloadsPlay.erase(levelId);
-                              auto scene = LevelInfoLayer::scene(lvl, true);
+                              auto scene = LevelInfoLayer::scene(lvl, false);
                               auto transitionFade = CCTransitionFade::create(0.5f, scene);
                               CCDirector::sharedDirector()->pushScene(transitionFade);
                         } else {
@@ -700,7 +714,7 @@ void RLEventLayouts::onPlayEvent(CCObject* sender) {
                                     // restore UI before opening
                                     selfRef->restoreUIForLevel(levelId);
                                     selfRef->m_pendingDownloadsPlay.erase(levelId);
-                                    auto scene = LevelInfoLayer::scene(lvl, true);
+                                    auto scene = LevelInfoLayer::scene(lvl, false);
                                     auto transitionFade = CCTransitionFade::create(0.5f, scene);
                                     CCDirector::sharedDirector()->pushScene(transitionFade);
                                     selfRef->m_loadedLevels.erase(levelId);

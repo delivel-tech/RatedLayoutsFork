@@ -31,6 +31,7 @@ class RLSearchLayer : public CCLayer {
       RowLayout* m_optionsLayout = nullptr;
       CCMenuItemSpriteExtra* m_featuredItem = nullptr;
       CCMenuItemSpriteExtra* m_awardedItem = nullptr;
+      CCMenuItemSpriteExtra* m_epicItem = nullptr;
       CCMenuItemSpriteExtra* m_oldestItem = nullptr;
 
       // difficulty filter buttons
@@ -47,6 +48,8 @@ class RLSearchLayer : public CCLayer {
       bool m_demonModeActive = false;
       bool m_featuredActive = false;
       bool m_awardedActive = false;
+      bool m_epicActive = false;
+      void onEpicToggle(CCObject* sender);
       bool m_oldestActive = false;
       void onInfoButton(CCObject* sender);
       void onOldestToggle(CCObject* sender);

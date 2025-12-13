@@ -59,11 +59,11 @@ bool ModRatePopup::setup(std::string title, GJGameLevel* level) {
       for (int i = 1; i <= 9; i++) {
             auto buttonBg = CCSprite::create("GJ_button_04.png");
             auto buttonLabel =
-                CCLabelBMFont::create(std::to_string(i).c_str(), "bigFont.fnt");
+                CCLabelBMFont::create(numToString(i).c_str(), "bigFont.fnt");
             buttonLabel->setScale(0.75f);
             buttonLabel->setPosition(buttonBg->getContentSize() / 2);
             buttonBg->addChild(buttonLabel);
-            buttonBg->setID("button-bg-" + std::to_string(i));
+            buttonBg->setID("button-bg-" + numToString(i));
 
             auto ratingButtonItem = CCMenuItemSpriteExtra::create(
                 buttonBg, this, menu_selector(ModRatePopup::onRatingButton));
@@ -76,7 +76,7 @@ bool ModRatePopup::setup(std::string title, GJGameLevel* level) {
                       {startX + (i - 6) * buttonSpacing, firstRowY - 55.f});
             }
             ratingButtonItem->setTag(i);
-            ratingButtonItem->setID("rating-button-" + std::to_string(i));
+            ratingButtonItem->setID("rating-button-" + numToString(i));
             m_normalButtonsContainer->addChild(ratingButtonItem);
       }
 
@@ -87,18 +87,18 @@ bool ModRatePopup::setup(std::string title, GJGameLevel* level) {
             int rating = demonRatings[idx];
             auto buttonBg = CCSprite::create("GJ_button_04.png");
             auto buttonLabel =
-                CCLabelBMFont::create(std::to_string(rating).c_str(), "bigFont.fnt");
+                CCLabelBMFont::create(numToString(rating).c_str(), "bigFont.fnt");
             buttonLabel->setScale(0.75f);
             buttonLabel->setPosition(buttonBg->getContentSize() / 2);
             buttonBg->addChild(buttonLabel);
-            buttonBg->setID("button-bg-" + std::to_string(rating));
+            buttonBg->setID("button-bg-" + numToString(rating));
 
             auto ratingButtonItem = CCMenuItemSpriteExtra::create(
                 buttonBg, this, menu_selector(ModRatePopup::onRatingButton));
 
             ratingButtonItem->setPosition({startX + idx * buttonSpacing, firstRowY});
             ratingButtonItem->setTag(rating);
-            ratingButtonItem->setID("rating-button-" + std::to_string(rating));
+            ratingButtonItem->setID("rating-button-" + numToString(rating));
             m_demonButtonsContainer->addChild(ratingButtonItem);
       }
 
@@ -541,16 +541,16 @@ void ModRatePopup::onRatingButton(CCObject* sender) {
             CCMenu* prevContainer = (m_selectedRating <= 9) ? m_normalButtonsContainer
                                                             : m_demonButtonsContainer;
             auto prevButton = prevContainer->getChildByID(
-                "rating-button-" + std::to_string(m_selectedRating));
+                "rating-button-" + numToString(m_selectedRating));
             if (prevButton) {
                   auto prevButtonItem = static_cast<CCMenuItemSpriteExtra*>(prevButton);
                   auto prevButtonBg = CCSprite::create("GJ_button_04.png");
                   auto prevButtonLabel = CCLabelBMFont::create(
-                      std::to_string(m_selectedRating).c_str(), "bigFont.fnt");
+                      numToString(m_selectedRating).c_str(), "bigFont.fnt");
                   prevButtonLabel->setPosition(prevButtonBg->getContentSize() / 2);
                   prevButtonLabel->setScale(0.75f);
                   prevButtonBg->addChild(prevButtonLabel);
-                  prevButtonBg->setID("button-bg-" + std::to_string(m_selectedRating));
+                  prevButtonBg->setID("button-bg-" + numToString(m_selectedRating));
                   prevButtonItem->setNormalImage(prevButtonBg);
             }
       }
@@ -558,11 +558,11 @@ void ModRatePopup::onRatingButton(CCObject* sender) {
       auto currentButton = static_cast<CCMenuItemSpriteExtra*>(sender);
       auto currentButtonBg = CCSprite::create("GJ_button_01.png");
       auto currentButtonLabel =
-          CCLabelBMFont::create(std::to_string(rating).c_str(), "bigFont.fnt");
+          CCLabelBMFont::create(numToString(rating).c_str(), "bigFont.fnt");
       currentButtonLabel->setPosition(currentButtonBg->getContentSize() / 2);
       currentButtonLabel->setScale(0.75f);
       currentButtonBg->addChild(currentButtonLabel);
-      currentButtonBg->setID("button-bg-" + std::to_string(rating));
+      currentButtonBg->setID("button-bg-" + numToString(rating));
       currentButton->setNormalImage(currentButtonBg);
 
       m_selectedRating = button->getTag();
