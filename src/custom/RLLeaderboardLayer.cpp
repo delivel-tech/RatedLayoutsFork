@@ -152,7 +152,7 @@ void RLLeaderboardLayer::onInfoButton(CCObject* sender) {
           "The leaderboard shows the top players in <cb>Rated Layouts</c> based "
           "on <cl>Stars</c> or <cl>Creator Points</c>. You can view each category by selecting the tabs.\n\n"
           "<cl>Blueprint Stars</c> are earned by completing a <cb>Rated Layouts</c> level and are only counted when beaten legitimately. Any <cr>unfair</c> means of obtaining these stars will result in an exclusion from the leaderboard.\n\n"
-          "<cl>Blueprint Creator Points</c> are earned based on the how many rated layouts levels you have in your account. Getting a rated layout level earns you 1 point and getting a <cy>featured rated layout</cy> level earns you 2 points.",
+          "<cl>Blueprint Creator Points</c> are earned based on the how many rated layouts levels you have in your account. Getting a rated layout level earns you 1 point, <cy>Featured Rated Layouts</c> level earns you 2 points and <cp>Epic Rated Layout</c> levels earn you 3 points.\n\n",
           "OK")
           ->show();
 }

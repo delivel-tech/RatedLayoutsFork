@@ -7,6 +7,41 @@
 
 using namespace geode::prelude;
 
+// helper functions for caching user roles (local copy to keep file self-contained)
+static std::string getUserRoleCachePath_ProfilePage() {
+      auto saveDir = dirs::getModsSaveDir();
+      return geode::utils::string::pathToString(saveDir / "user_role_cache.json");
+}
+
+static void cacheUserProfile_ProfilePage(int accountId, int role, int stars) {
+      auto saveDir = dirs::getModsSaveDir();
+      auto createDirResult = utils::file::createDirectory(saveDir);
+      if (!createDirResult) {
+            log::warn("Failed to create save directory for user role cache");
+            return;
+      }
+
+      auto cachePath = getUserRoleCachePath_ProfilePage();
+
+      matjson::Value root = matjson::Value::object();
+      auto existingData = utils::file::readString(cachePath);
+      if (existingData) {
+            auto parsed = matjson::parse(existingData.unwrap());
+            if (parsed) root = parsed.unwrap();
+      }
+
+      matjson::Value obj = matjson::Value::object();
+      obj["role"] = role;
+      obj["stars"] = stars;
+      root[fmt::format("{}", accountId)] = obj;
+
+      auto jsonString = root.dump();
+      auto writeResult = utils::file::writeString(geode::utils::string::pathToString(cachePath), jsonString);
+      if (writeResult) {
+            log::debug("Cached user role {} for account ID: {} (from ProfilePage)", role, accountId);
+      }
+}
+
 class $modify(RLProfilePage, ProfilePage) {
       struct Fields {
             CCLabelBMFont* blueprintStarsCount = nullptr;
@@ -182,6 +217,8 @@ class $modify(RLProfilePage, ProfilePage) {
                   // store the values into the saved value
                   pageRef->m_fields->role = role;
 
+                  cacheUserProfile_ProfilePage(pageRef->m_fields->accountId, role, stars);
+
                   // existing stats containers, this is so hacky but wanted to keep it
                   // at the right side
                   auto blueprintStarsContainer =
@@ -324,6 +361,9 @@ class $modify(RLProfilePage, ProfilePage) {
                   if (userNameMenu->getChildByID("rl-owner-badge")) {
                         return;
                   }
+                  if (auto mod = userNameMenu->getChildByID("rl-mod-badge")) mod->removeFromParent();
+                  if (auto admin = userNameMenu->getChildByID("rl-admin-badge")) admin->removeFromParent();
+
                   auto ownerBadgeSprite = CCSprite::create("rlBadgeOwner.png"_spr);
                   auto ownerBadgeButton = CCMenuItemSpriteExtra::create(
                       ownerBadgeSprite, this, menu_selector(RLProfilePage::onOwnerBadge));
@@ -333,6 +373,8 @@ class $modify(RLProfilePage, ProfilePage) {
                   if (userNameMenu->getChildByID("rl-mod-badge")) {
                         return;
                   }
+                  if (auto owner = userNameMenu->getChildByID("rl-owner-badge")) owner->removeFromParent();
+                  if (auto admin = userNameMenu->getChildByID("rl-admin-badge")) admin->removeFromParent();
 
                   auto modBadgeSprite = CCSprite::create("rlBadgeMod.png"_spr);
                   auto modBadgeButton = CCMenuItemSpriteExtra::create(
@@ -346,6 +388,8 @@ class $modify(RLProfilePage, ProfilePage) {
                         log::info("Admin badge already exists, skipping creation");
                         return;
                   }
+                  if (auto owner = userNameMenu->getChildByID("rl-owner-badge")) owner->removeFromParent();
+                  if (auto mod = userNameMenu->getChildByID("rl-mod-badge")) mod->removeFromParent();
                   auto adminBadgeSprite = CCSprite::create("rlBadgeAdmin.png"_spr);
                   auto adminBadgeButton = CCMenuItemSpriteExtra::create(
                       adminBadgeSprite, this, menu_selector(RLProfilePage::onAdminBadge));

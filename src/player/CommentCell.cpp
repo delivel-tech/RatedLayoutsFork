@@ -61,6 +61,25 @@ static void cacheUserProfile(int accountId, int role, int stars) {
       }
 }
 
+static void removeCachedUserProfile(int accountId) {
+      auto cachePath = getUserRoleCachePath();
+      auto existingData = utils::file::readString(cachePath);
+      if (!existingData) return;
+
+      auto parsed = matjson::parse(existingData.unwrap());
+      if (!parsed) return;
+      auto root = parsed.unwrap();
+      if (!root.isObject()) return;
+      auto key = fmt::format("{}", accountId);
+      if (!root.contains(key)) return;
+      root.erase(key);
+      auto jsonString = root.dump();
+      auto writeResult = utils::file::writeString(geode::utils::string::pathToString(cachePath), jsonString);
+      if (writeResult) {
+            log::debug("Removed cached user profile for account ID: {}", accountId);
+      }
+}
+
 class $modify(RLCommentCell, CommentCell) {
       struct Fields {
             int role = 0;
@@ -75,7 +94,7 @@ class $modify(RLCommentCell, CommentCell) {
                   return;
             }
 
-            // check cache first
+            // check cache first and populate immediately
             auto cachedProfile = getCachedUserProfile(comment->m_accountID);
             if (cachedProfile) {
                   m_fields->role = cachedProfile->role;
@@ -83,10 +102,17 @@ class $modify(RLCommentCell, CommentCell) {
                   log::debug("Loaded cached role {} and stars {} for user {}", m_fields->role, m_fields->stars, comment->m_accountID);
                   loadBadgeForComment(comment->m_accountID);
                   applyStarGlow(comment->m_accountID, m_fields->stars);
+
+                  // If compatibility mode is disabled, always attempt to refresh the cache from the server
+                  if (!Mod::get()->getSettingValue<bool>("compatibilityMode")) {
+                        log::debug("compatibilityMode disabled — fetching fresh profile for {}", comment->m_accountID);
+                        fetchUserRole(comment->m_accountID);
+                  }
+
                   return;
             }
 
-            // disable comment fetching if enabled
+            // If not cached, fetch profile data unless compatibility mode is enabled
             if (!Mod::get()->getSettingValue<bool>("compatibilityMode")) {
                   fetchUserRole(comment->m_accountID);
             }
@@ -118,7 +144,7 @@ class $modify(RLCommentCell, CommentCell) {
                   log::debug("using comment emoji text area, applying color");
                   if (auto label = typeinfo_cast<CCLabelBMFont*>(emojiTextArea)) {
                         label->setColor(color);
-                  } // cant bothered adding colors support for non-compact mode for the emojis mod thingy
+                  }  // cant bothered adding colors support for non-compact mode for the emojis mod thingy
             }
             // apply the color to the comment text label
             else if (auto commentTextLabel = typeinfo_cast<CCLabelBMFont*>(
@@ -169,6 +195,27 @@ class $modify(RLCommentCell, CommentCell) {
 
                   if (!response->ok()) {
                         log::warn("Server returned non-ok status: {}", response->code());
+                        // If server says the profile doesn't exist (404), remove cached entry
+                        if (response->code() == 404) {
+                              log::debug("Profile not found on server, removing cached entry for {}", accountId);
+                              removeCachedUserProfile(accountId);
+                              if (!cellRef) return;
+                              cellRef->m_fields->role = 0;
+                              cellRef->m_fields->stars = 0;
+
+                              // remove any role badges if present (very unlikely scenario lol)
+                              if (cellRef->m_mainLayer) {
+                                    if (auto userNameMenu = typeinfo_cast<CCMenu*>(cellRef->m_mainLayer->getChildByIDRecursive("username-menu"))) {
+                                          if (auto owner = userNameMenu->getChildByID("rl-comment-owner-badge")) owner->removeFromParent();
+                                          if (auto mod = userNameMenu->getChildByID("rl-comment-mod-badge")) mod->removeFromParent();
+                                          if (auto admin = userNameMenu->getChildByID("rl-comment-admin-badge")) admin->removeFromParent();
+                                          userNameMenu->updateLayout();
+                                    }
+                                    // remove any glow
+                                    auto glowId = fmt::format("rl-comment-glow-{}", accountId);
+                                    if (auto glow = cellRef->m_mainLayer->getChildByIDRecursive(glowId)) glow->removeFromParent();
+                              }
+                        }
                         return;
                   }
 
@@ -200,28 +247,35 @@ class $modify(RLCommentCell, CommentCell) {
                   log::warn("username-menu not found in comment cell");
                   return;
             }
+            // Avoid creating duplicate badges if one already exists
             if (accountId == 7689052) {  // ArcticWoof
-                  auto ownerBadgeSprite = CCSprite::create("rlBadgeOwner.png"_spr);
-                  ownerBadgeSprite->setScale(0.7f);
-                  auto ownerBadgeButton = CCMenuItemSpriteExtra::create(
-                      ownerBadgeSprite, this, menu_selector(RLCommentCell::onOwnerBadge));
-                  ownerBadgeButton->setID("rl-comment-owner-badge");
-                  userNameMenu->addChild(ownerBadgeButton);
+                  if (!userNameMenu->getChildByID("rl-comment-owner-badge")) {
+                        auto ownerBadgeSprite = CCSprite::create("rlBadgeOwner.png"_spr);
+                        ownerBadgeSprite->setScale(0.7f);
+                        auto ownerBadgeButton = CCMenuItemSpriteExtra::create(
+                            ownerBadgeSprite, this, menu_selector(RLCommentCell::onOwnerBadge));
+                        ownerBadgeButton->setID("rl-comment-owner-badge");
+                        userNameMenu->addChild(ownerBadgeButton);
+                  }
             } else if (m_fields->role == 1) {
-                  auto modBadgeSprite = CCSprite::create("rlBadgeMod.png"_spr);
-                  modBadgeSprite->setScale(0.7f);
-                  auto modBadgeButton = CCMenuItemSpriteExtra::create(
-                      modBadgeSprite, this, menu_selector(RLCommentCell::onModBadge));
+                  if (!userNameMenu->getChildByID("rl-comment-mod-badge")) {
+                        auto modBadgeSprite = CCSprite::create("rlBadgeMod.png"_spr);
+                        modBadgeSprite->setScale(0.7f);
+                        auto modBadgeButton = CCMenuItemSpriteExtra::create(
+                            modBadgeSprite, this, menu_selector(RLCommentCell::onModBadge));
 
-                  modBadgeButton->setID("rl-comment-mod-badge");
-                  userNameMenu->addChild(modBadgeButton);
+                        modBadgeButton->setID("rl-comment-mod-badge");
+                        userNameMenu->addChild(modBadgeButton);
+                  }
             } else if (m_fields->role == 2) {
-                  auto adminBadgeSprite = CCSprite::create("rlBadgeAdmin.png"_spr);
-                  adminBadgeSprite->setScale(0.7f);
-                  auto adminBadgeButton = CCMenuItemSpriteExtra::create(
-                      adminBadgeSprite, this, menu_selector(RLCommentCell::onAdminBadge));
-                  adminBadgeButton->setID("rl-comment-admin-badge");
-                  userNameMenu->addChild(adminBadgeButton);
+                  if (!userNameMenu->getChildByID("rl-comment-admin-badge")) {
+                        auto adminBadgeSprite = CCSprite::create("rlBadgeAdmin.png"_spr);
+                        adminBadgeSprite->setScale(0.7f);
+                        auto adminBadgeButton = CCMenuItemSpriteExtra::create(
+                            adminBadgeSprite, this, menu_selector(RLCommentCell::onAdminBadge));
+                        adminBadgeButton->setID("rl-comment-admin-badge");
+                        userNameMenu->addChild(adminBadgeButton);
+                  }
             }
             userNameMenu->updateLayout();
             applyCommentTextColor(accountId);

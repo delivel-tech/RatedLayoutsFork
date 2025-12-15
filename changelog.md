@@ -1,3 +1,8 @@
+# v0.2.7-beta.1
+
+- **New Texture Update!** Huge thanks to [Dasshu](id:1975253) for creating new textures for Rated Layouts mod!
+- Fixed issue where users cache isn't always up to date when showing stats in the comments.
+
 # v0.2.6-beta.1
 
 - Fixed bug where Layout Admins can't submit featured score for Epic Layouts.
@@ -5,7 +10,7 @@
 - Fixed issue where Blueprint Stars isn't showing the correct amount at the Garage Layer.
 - Fixed issue where users who has [Comment Emojis Reloaded](mod:prevter.comment_emojis) mod installed can't see Mods/Admins colored comments.
 - Fixed issue where the Blueprint Stars label is overflowing outside the container in the Profile Page. (Looks nice for those who has 1000+ stars now!)
-- Added Stars value formatting. *(Now it shows 1,234 instead of 1234)*
+- Added Stars value formatting. _(Now it shows 1,234 instead of 1234)_
 - Added Rated Layout Button at the Level Search Layer.
 
 # v0.2.5-beta.1
