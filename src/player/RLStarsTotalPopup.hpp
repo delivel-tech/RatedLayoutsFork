@@ -12,6 +12,7 @@ class RLStarsTotalPopup : public geode::Popup<> {
       bool setup() override;
       int m_accountId = 0;
       CCLabelBMFont* m_resultsLabel = nullptr;
+      CCLabelBMFont* m_rankLabel = nullptr;
       LoadingSpinner* m_spinner = nullptr;
       CCMenu* m_facesContainer = nullptr;
       RowLayout* m_facesLayout = nullptr;

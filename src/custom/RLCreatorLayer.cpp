@@ -6,6 +6,7 @@
 #include <random>
 
 #include "../level/RLEventLayouts.hpp"
+#include "RLAddDialogue.hpp"
 #include "RLAnnoucementPopup.hpp"
 #include "RLCreditsPopup.hpp"
 #include "RLLeaderboardLayer.hpp"
@@ -149,7 +150,14 @@ bool RLCreatorLayer::init() {
           infoButtonSpr, this, menu_selector(RLCreatorLayer::onInfoButton));
       infoButton->setPosition({25, 25});
       infoMenu->addChild(infoButton);
+      // discord thingy
+      auto discordIconSpr = CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png");
+      auto discordIconBtn = CCMenuItemSpriteExtra::create(discordIconSpr, this, menu_selector(RLCreatorLayer::onDiscordButton));
+      discordIconBtn->setPosition({infoButton->getPositionX(), infoButton->getPositionY() + 30});
+      infoMenu->addChild(discordIconBtn);
       this->addChild(infoMenu);
+
+      this->addChild(discordIconBtn);
       // credits button at the bottom right
       auto creditButtonSpr =
           CCSprite::create("RL_badgeMod01.png"_spr);
@@ -158,6 +166,16 @@ bool RLCreatorLayer::init() {
           creditButtonSpr, this, menu_selector(RLCreatorLayer::onCreditsButton));
       creditButton->setPosition({winSize.width - 25, 25});
       infoMenu->addChild(creditButton);
+
+      // button
+      if (Mod::get()->getSavedValue<int>("role") >= 1) {
+            auto addDiagloueBtnSpr = CCSprite::createWithSpriteFrameName("GJ_secretLock4_small_001.png");
+            addDiagloueBtnSpr->setOpacity(100);
+            auto addDialogueBtn = CCMenuItemSpriteExtra::create(
+                addDiagloueBtnSpr, this, menu_selector(RLCreatorLayer::onSecretDialogueButton));
+            addDialogueBtn->setPosition({creditButton->getPositionX(), creditButton->getPositionY() + 40});
+            infoMenu->addChild(addDialogueBtn);
+      }
 
       // test the ground moving thingy :o
       // idk how gd actually does it correctly but this is close enough i guess
@@ -222,129 +240,56 @@ void RLCreatorLayer::onSettingsButton(CCObject* sender) {
       openSettingsPopup(getMod());
 }
 
+void RLCreatorLayer::onDiscordButton(CCObject* sender) {
+      utils::web::openLinkInBrowser("https://discord.gg/jBf2wfBgVT");
+}
+
 void RLCreatorLayer::onLayoutGauntlets(CCObject* sender) {
       auto annoucement = RLAnnoucementPopup::create();
       annoucement->show();
 }
 
+void RLCreatorLayer::onSecretDialogueButton(CCObject* sender) {
+      if (Mod::get()->getSavedValue<int>("role") < 1) {
+            return;
+      }
+      auto dialogue = RLAddDialogue::create();
+      dialogue->show();
+}
+
 void RLCreatorLayer::onUnknownButton(CCObject* sender) {
-      auto rng = rand() % 11;
-      DialogObject* dialogObj = nullptr;
-      // the yapp-a-ton
-      switch (rng) {
-            case 0:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "Shh... don't tell anyone about this but I think <cg>RubRub</c> <cr>hates</c> this mod!",
-                      28,
-                      .8f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 1:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "Do you hate the <cg>RobTop's</c> <cr>rating system</c>? Me too... Let's keep this between us.",
-                      28,
-                      .8f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 2:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "Psst... Want to know a secret? <cb>Rated Layouts</c> is actually <cl>better</c> than <cg>RobTop's</c> rating system!",
-                      28,
-                      .8f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 3:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "I believe we need a <cg>decentralized</c> rating system. <cb>Rated Layouts</c> is the future!",
-                      28,
-                      .8f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 4:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "Between you and me, I think <cg>RobTop</c> could learn a thing or two from <cb>Rated Layouts</c> rating system.",
-                      28,
-                      .8f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 5:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "You know, <cb>Rated Layouts</c> is more than just a rating system; it's us <co>tired creators</c> gambling our <cr>sanity</c> to get a <cr><s250>SINGLE</s></c> <cy>mod sent!</c>",
-                      28,
-                      .8f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 6:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "Sorry if I'm a bit <cr>grumpy</c> today, it's just that my last <cy>three levels</c> didn't <cb>get a sent</c>...",
-                      28,
-                      .8f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 7:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "Make <cl>rate worthy</c> level, join a <cy>mod level request stream</c>, see <cr>100 levels queued</c>, get <cc>depressed</c>, repeat.",
-                      28,
-                      .8f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 8:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "It's funny that <cb>Rated Layouts</c> actually has more than <cg>two</c> people who <cy>rate levels</c>. <cg>RobTop's</c> rating system has like... what, <cr>one?</c>",
-                      28,
-                      .8f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 9:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "You know, sometimes I wonder if <cg>RobTop</c> even plays the entire level while rating levels.",
-                      28,
-                      .8f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 10:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "I'm <co>annoyed</c> that <cy>popular creators</c> always get their levels rated <cl>instantly</c>, while <cb>unknown creators</c> like us have to wait <s250><cr>weeks</c></s> just to get a <cy>rated level</c>.",
-                      28,
-                      .6f,
-                      false,
-                      ccWHITE);
-                  break;
-            case 11:
-                  dialogObj = DialogObject::create(
-                      "Level Creator",
-                      "Sometimes I feel like <cr>RobTop</c> rates levels based on <cg>their popularity status</c> rather than the actual <cb>quality of the level</c>. It's so <co>frustrating</c>!",
-                      28,
-                      .6f,
-                      false,
-                      ccWHITE);
-      }
-      if (dialogObj) {
-            auto dialog = DialogLayer::createDialogLayer(dialogObj, nullptr, 2);
-            dialog->addToMainScene();
-            dialog->animateInRandomSide();
-      }
+      // fetch dialogue from server and show it in a dialog
+      web::WebRequest()
+          .get("https://gdrate.arcticwoof.xyz/getDialogue")
+          .listen([this](web::WebResponse* res) {
+                std::string text = "...";  // default text
+                if (res && res->ok()) {
+                      auto jsonRes = res->json();
+                      if (jsonRes) {
+                            auto json = jsonRes.unwrap();
+                            if (auto diag = json["dialogue"].asString(); diag) {
+                                  text = diag.unwrap();
+                            }
+                      } else {
+                            log::error("Failed to parse getDialogue response");
+                      }
+                } else {
+                      log::error("Failed to fetch dialogue");
+                }
+
+                DialogObject* dialogObj = DialogObject::create(
+                    "Layout Creator",
+                    text.c_str(),
+                    28,
+                    1.f,
+                    false,
+                    ccWHITE);
+                if (dialogObj) {
+                      auto dialog = DialogLayer::createDialogLayer(dialogObj, nullptr, 2);
+                      dialog->addToMainScene();
+                      dialog->animateInRandomSide();
+                }
+          });
 }
 
 void RLCreatorLayer::onInfoButton(CCObject* sender) {

@@ -206,9 +206,10 @@ void RLCreditsPopup::onAccountClicked(CCObject* sender) {
 
 void RLCreditsPopup::onInfo(CCObject* sender) {
       MDPopup::create(
-          "How to become a Layout Admin/Moderator",
-          "Firstly, you need to be active on the <cl>Rated Layouts Discord server</c> and actively show interest in helping with the mod. <cl>Rated Layouts</c> don't promote any moderators/admins outside the Discord Server due to various reason and to keep things in track.\n\n"
-          "### <cr>Begging for moderator/admin will lower your chances!</c>\n\n"
+          "How to become a Layout Moderator",
+          "Firstly, you need to be active on the <cl>Rated Layouts Discord server</c> and actively show interest in helping with the mod.\n\n"
+          "<cl>Rated Layouts</c> don't promote any <cg>Layout Moderators</c> outside the Discord Server due to various reason and to keep things in track.\n\n"
+          "### <cr>Begging for Layout Moderator will less likely for ArcticWoof to promote you!</c>\n\n"
           "All decision on who becomes a <cg>Layout Admin/Moderator</c> is up to <cf>ArcticWoof</c>.\n\n"
           "There will be an <cy>application</c> that will be posted on the <cl>Discord server</c> for more information!\n\n"
           "If you do show that you have interest in helping with the mod, you may be contacted by <cf>ArcticWoof</c>."

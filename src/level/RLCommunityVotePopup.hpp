@@ -24,8 +24,10 @@ class RLCommunityVotePopup : public geode::Popup<> {
       CCLabelBMFont* m_gameplayScoreLabel = nullptr;
       CCLabelBMFont* m_modDifficultyLabel = nullptr;
 
-      // text inputs for votes (values should be -1, 0, or 1)
       geode::TextInput* m_designInput = nullptr;
       geode::TextInput* m_difficultyInput = nullptr;
       geode::TextInput* m_gameplayInput = nullptr;
+
+      CCMenuItemSpriteExtra* m_submitBtn = nullptr;
+      void refreshFromServer();
 };

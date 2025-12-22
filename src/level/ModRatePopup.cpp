@@ -630,6 +630,7 @@ void ModRatePopup::onSetEventButton(CCObject* sender) {
       if (!item) return;
       // mapping by ID
       std::string id = item->getID();
+      log::info("Button ID: {}", id);
       std::string type;
       if (id == "event-daily") {
             type = "daily";
@@ -650,39 +651,51 @@ void ModRatePopup::onSetEventButton(CCObject* sender) {
             return;
       }
 
-      matjson::Value jsonBody = matjson::Value::object();
-      jsonBody["accountId"] = GJAccountManager::get()->m_accountID;
-      jsonBody["argonToken"] = token;
-      jsonBody["levelId"] = m_levelId;
-      jsonBody["type"] = type;
+      std::string title = "Set " + type + " layout?";
+      std::string content = "Are you sure you want to set this <cg>level</c> as the <co>" + type + " layout?</c>";
 
-      log::info("Sending setEvent request: {}", jsonBody.dump());
-      auto postReq = web::WebRequest();
-      postReq.bodyJSON(jsonBody);
-      auto postTask = postReq.post("https://gdrate.arcticwoof.xyz/setEvent");
+      geode::createQuickPopup(
+          title.c_str(),
+          content.c_str(),
+          "No",
+          "Yes",
+          [this, type, token](auto, bool yes) {
+                log::info("Popup callback triggered, yes={}", yes);
+                if (!yes) return;
+                matjson::Value jsonBody = matjson::Value::object();
+                jsonBody["accountId"] = GJAccountManager::get()->m_accountID;
+                jsonBody["argonToken"] = token;
+                jsonBody["levelId"] = m_levelId;
+                jsonBody["type"] = type;
 
-      postTask.listen([this, type](web::WebResponse* response) {
-            log::info("Received setEvent response for type: {}", type);
-            if (!response->ok()) {
-                  log::warn("Server returned non-ok status: {}", response->code());
-                  Notification::create("Failed to set event", NotificationIcon::Error)->show();
-                  return;
-            }
-            auto jsonRes = response->json();
-            if (!jsonRes) {
-                  log::warn("Failed to parse setEvent JSON response");
-                  Notification::create("Invalid server response", NotificationIcon::Error)->show();
-                  return;
-            }
-            auto json = jsonRes.unwrap();
-            bool success = json["success"].asBool().unwrapOrDefault();
-            std::string message = json["message"].asString().unwrapOrDefault();
-            if (success || message == "Event set successfully") {
-                  Notification::create("Event set: " + type, NotificationIcon::Success)->show();
-            } else {
-                  Notification::create("Failed to set event", NotificationIcon::Error)->show();
-            }
-      });
+                log::info("Sending setEvent request: {}", jsonBody.dump());
+                auto postReq = web::WebRequest();
+                postReq.bodyJSON(jsonBody);
+                auto postTask = postReq.post("https://gdrate.arcticwoof.xyz/setEvent");
+
+                postTask.listen([this, type](web::WebResponse* response) {
+                      log::info("Received setEvent response for type: {}", type);
+                      if (!response->ok()) {
+                            log::warn("Server returned non-ok status: {}", response->code());
+                            Notification::create("Failed to set event", NotificationIcon::Error)->show();
+                            return;
+                      }
+                      auto jsonRes = response->json();
+                      if (!jsonRes) {
+                            log::warn("Failed to parse setEvent JSON response");
+                            Notification::create("Invalid server response", NotificationIcon::Error)->show();
+                            return;
+                      }
+                      auto json = jsonRes.unwrap();
+                      bool success = json["success"].asBool().unwrapOrDefault();
+                      std::string message = json["message"].asString().unwrapOrDefault();
+                      if (success || message == "Event set successfully") {
+                            Notification::create("Event set: " + type, NotificationIcon::Success)->show();
+                      } else {
+                            Notification::create("Failed to set event", NotificationIcon::Error)->show();
+                      }
+                });
+          });
 }
 
 ModRatePopup* ModRatePopup::create(std::string title, GJGameLevel* level) {

@@ -23,6 +23,8 @@ class RLCreatorLayer : public CCLayer {
       void onSearchLayouts(CCObject* sender);
       void onCreditsButton(CCObject* sender);
       void onSettingsButton(CCObject* sender);
+      void onDiscordButton(CCObject* sender);
+      void onSecretDialogueButton(CCObject* sender);
 
       CCNode* m_bgContainer = nullptr;
       std::vector<CCSprite*> m_bgTiles;

@@ -259,6 +259,13 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer) {
                               shouldDisable = !(normalPct >= 20 || practicePct >= 80);
                         }
 
+                        // Mods/Admins can always vote regardless of percentages
+                        int userRole = Mod::get()->getSavedValue<int>("role");
+                        if (userRole == 1 || userRole == 2) {
+                              shouldDisable = false;
+                              log::debug("Community vote enabled due to role override (role={})", userRole);
+                        }
+
                         auto commSprite = shouldDisable ? CCSpriteGrayscale::create("RL_commVote01.png"_spr) : CCSprite::create("RL_commVote01.png"_spr);
                         if (commSprite) {
                               auto commBtnSpr = CircleButtonSprite::create(commSprite, shouldDisable ? CircleBaseColor::Gray : CircleBaseColor::Green, CircleBaseSize::Medium);
@@ -660,6 +667,13 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer) {
                               shouldDisable = !(normalPct >= 20 || practicePct >= 80);
                         }
 
+                        // Mods/Admins can always vote regardless of percentages
+                        int userRole = Mod::get()->getSavedValue<int>("role");
+                        if (userRole == 1 || userRole == 2) {
+                              shouldDisable = false;
+                              log::debug("Community vote enabled due to role override (role={})", userRole);
+                        }
+
                         auto commSprite = shouldDisable ? CCSpriteGrayscale::create("RL_commVote01.png"_spr) : CCSprite::create("RL_commVote01.png"_spr);
                         if (commSprite) {
                               auto commBtnSpr = CircleButtonSprite::create(commSprite, shouldDisable ? CircleBaseColor::Gray : CircleBaseColor::Green, CircleBaseSize::Medium);
@@ -896,6 +910,13 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer) {
             int practicePct = this->m_level->m_practicePercent;
             bool shouldDisable = true;
             shouldDisable = !(normalPct >= 20 || practicePct >= 80);
+
+            int userRole = Mod::get()->getSavedValue<int>("role");
+            if (userRole == 1 || userRole == 2) {
+                  shouldDisable = false;
+                  log::debug("Community vote enabled due to role override (role={})", userRole);
+            }
+
             if (shouldDisable) {
                   log::info("Community vote button clicked!");
                   FLAlertLayer::create(
@@ -1009,6 +1030,25 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer) {
                         Mod::get()->setSavedValue<int>("role", role);
                   } else {
                         Mod::get()->setSavedValue<int>("role", 0);
+                  }
+
+                  // Refresh the community vote button immediately so role overrides take effect
+                  auto cached = getCachedLevel(layerRef->m_level->m_levelID);
+                  if (cached) {
+                        // remove existing vote button if present so it can be recreated
+                        auto playMenuNode = layerRef->getChildByID("play-menu");
+                        if (playMenuNode && typeinfo_cast<CCMenu*>(playMenuNode)) {
+                              auto existing = static_cast<CCMenu*>(playMenuNode)->getChildByID("rl-community-vote");
+                              if (existing) existing->removeFromParent();
+                        }
+                        auto leftMenuNode = layerRef->getChildByID("left-side-menu");
+                        if (leftMenuNode && typeinfo_cast<CCMenu*>(leftMenuNode)) {
+                              auto existing = static_cast<CCMenu*>(leftMenuNode)->getChildByID("rl-community-vote");
+                              if (existing) existing->removeFromParent();
+                        }
+
+                        // Re-run processing with cached data to recreate the button with the correct state
+                        layerRef->processLevelRating(cached.value(), layerRef, layerRef->getChildByID("difficulty-sprite"));
                   }
             });
       }

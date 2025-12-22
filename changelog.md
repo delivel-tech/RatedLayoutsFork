@@ -1,10 +1,19 @@
+# v0.2.9-beta.1
+
+- Tweaked the **Community Vote** UI. If you are a Layout Moderator or Admin, it's unlocked by default. Others has to meet the percentage requirements to access it.
+- Community vote scores are now hidden until the user has voted, this ensure that users are not biased by the current votes.
+- Added **Discord Invite Button** in the Rated Layouts Main Layer to easily join the Rated Layouts Discord server.
+- Added **Global Rank** on the Difficulty Stats popup to show your global rank based on the number of stars you've collected.
+- **Secret Dialogue messages are now dynamic**. You might get different messages each time you click it!
+- **Layout Moderators and Admins** can now submit custom dialogue messages for users to see when they click the secret dialogue button.
+
 # v0.2.8-beta.1
 
 - **Added Layout Gauntlets Annoucement!** Be sure to check out the Layout Gauntlets Creator Contest!!
 - Fixed issue where [Badge API](mod:jouca.badgesapi) was set to the wrong recommended version
 - Removed [Demons In Between](mod:hiimjustin000.demons_in_between) from the incompatible mods as it doesn't conflict at all.
 
-###  _Note: You can still have [More Difficulties](mod:uproxide.more_difficulties) enabled, it just shows a warning that it conflicts but you can still use both mods._
+### _Note: You can still have [More Difficulties](mod:uproxide.more_difficulties) enabled, it just shows a warning that it conflicts but you can still use both mods._
 
 # v0.2.7-beta.1
 

@@ -167,6 +167,12 @@ bool RLStarsTotalPopup::setup() {
       toggleMenu->addChild(demonToggle);
       m_mainLayer->addChild(toggleMenu);
 
+      m_rankLabel = CCLabelBMFont::create("-", "goldFont.fnt");
+      m_rankLabel->setScale(0.4f);
+      m_rankLabel->setAnchorPoint({1.f, .5f});
+      m_rankLabel->setPosition({contentSize.width - 10.f, 15.f});
+      m_mainLayer->addChild(m_rankLabel);
+
       this->m_facesContainer = CCMenu::create();
       auto facesLayout = RowLayout::create();
       facesLayout->setGap(15.f)->setGrowCrossAxis(true)->setCrossAxisOverflow(false)->setAxisAlignment(AxisAlignment::Center);
@@ -206,17 +212,27 @@ bool RLStarsTotalPopup::setup() {
                       thisRef->m_spinner = nullptr;
                 }
                 std::unordered_map<int, int> counts;
+                auto difficultyObj = json["difficulty"];
                 std::vector<int> keys = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30};
                 for (int k : keys) {
-                      counts[k] = json[numToString(k)].asInt().unwrapOrDefault();
+                      counts[k] = difficultyObj[numToString(k)].asInt().unwrapOrDefault();
                 }
                 thisRef->m_counts = counts;
                 int totalCount = 0;
                 for (auto const& kv : counts) {
                       totalCount += kv.second;
                 }
+                // player's rank
+                int position = json["position"].asInt().unwrapOrDefault();
                 thisRef->setTitle((std::string("Rated Layouts Classic: ") + numToString(GameToolbox::pointsToString(totalCount))).c_str());
-                // remove loading label
+                if (thisRef->m_rankLabel) {
+                      if (position > 0) {
+                            thisRef->m_rankLabel->setString((std::string("Global Rank: ") + numToString(position)).c_str());
+                            thisRef->m_rankLabel->setVisible(true);
+                      } else {
+                            thisRef->m_rankLabel->setVisible(false);
+                      }
+                }
                 if (thisRef->m_resultsLabel) {
                       thisRef->m_resultsLabel->removeFromParent();
                       thisRef->m_resultsLabel = nullptr;
