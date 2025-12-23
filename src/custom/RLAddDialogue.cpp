@@ -16,6 +16,7 @@ bool RLAddDialogue::setup() {
       setTitle("Add Custom Dialogue");
 
       m_dialogueInput = TextInput::create(360.f, "Dialogue...", "chatFont.fnt");
+      m_dialogueInput->setCommonFilter(CommonFilter::Any);
       m_mainLayer->addChild(m_dialogueInput);
       m_dialogueInput->setPosition({m_mainLayer->getContentSize().width / 2.f, m_mainLayer->getContentSize().height / 2.f - 5.f});
 
