@@ -24,9 +24,36 @@ bool RLAddDialogue::setup() {
       auto submitSpr = ButtonSprite::create("Submit", "goldFont.fnt", "GJ_button_01.png");
       auto submitBtn = CCMenuItemSpriteExtra::create(submitSpr, this, menu_selector(RLAddDialogue::onSubmit));
 
-      submitBtn->setPosition({m_mainLayer->getContentSize().width / 2.f, 0.f});
+      submitBtn->setPosition({m_mainLayer->getContentSize().width / 2.f + 60.f, 0.f});
       m_buttonMenu->addChild(submitBtn);
+
+      // preview button
+      auto previewSpr = ButtonSprite::create("Preview", "goldFont.fnt", "GJ_button_01.png");
+      auto previewBtn = CCMenuItemSpriteExtra::create(previewSpr, this, menu_selector(RLAddDialogue::onPreview));
+      previewBtn->setPosition({m_mainLayer->getContentSize().width / 2.f - 60.f, 0.f});
+      m_buttonMenu->addChild(previewBtn);
       return true;
+}
+
+void RLAddDialogue::onPreview(CCObject* sender) {
+      if (!m_dialogueInput) return;
+      std::string dialogueText = m_dialogueInput->getString();
+      if (dialogueText.empty()) {
+            Notification::create("Dialogue cannot be empty!", NotificationIcon::Error)->show();
+            return;
+      }
+      DialogObject* dialogObj = DialogObject::create(
+          "Layout Creator",
+          dialogueText.c_str(),
+          28,
+          1.f,
+          false,
+          ccWHITE);
+      if (dialogObj) {
+            auto dialog = DialogLayer::createDialogLayer(dialogObj, nullptr, 2);
+            dialog->addToMainScene();
+            dialog->animateInRandomSide();
+      }
 }
 
 void RLAddDialogue::onSubmit(CCObject* sender) {

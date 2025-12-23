@@ -10,4 +10,5 @@ class RLAddDialogue : public geode::Popup<> {
       bool setup() override;
       TextInput* m_dialogueInput = nullptr;
       void onSubmit(CCObject* sender);
+      void onPreview(CCObject* sender);
 };
