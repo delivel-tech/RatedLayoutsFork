@@ -533,7 +533,7 @@ class $modify(RLLevelInfoLayer, LevelInfoLayer) {
 
                   if (GameStatsManager::sharedState()->hasCompletedOnlineLevel(layerRef->m_level->m_levelID)) {
                         if (layerRef && layerRef->m_level && layerRef->m_level->isPlatformer()) {
-                              starLabelValue->setColor({204, 101, 0});  // orange for planets
+                              starLabelValue->setColor({255, 160, 0});  // orange for planets
                         } else {
                               starLabelValue->setColor({0, 150, 255});  // cyan for stars
                         }

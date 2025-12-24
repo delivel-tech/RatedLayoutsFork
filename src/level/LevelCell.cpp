@@ -220,7 +220,7 @@ class $modify(LevelCell) {
                   newStarIcon->setID("rl-star-icon");
                   difficultySprite->addChild(newStarIcon);
 
-                  // star value label
+                  // reward value label
                   auto rewardLabelValue =
                       CCLabelBMFont::create(numToString(difficulty).c_str(), "bigFont.fnt");
                   if (rewardLabelValue) {
@@ -229,7 +229,8 @@ class $modify(LevelCell) {
                         rewardLabelValue->setScale(0.4f);
                         rewardLabelValue->setAnchorPoint({1.0f, 0.5f});
                         rewardLabelValue->setAlignment(kCCTextAlignmentRight);
-                        rewardLabelValue->setID("rl-star-label");
+                        rewardLabelValue->setID("rl-reward-label");
+                        difficultySprite->addChild(rewardLabelValue);
 
                         if (GameStatsManager::sharedState()->hasCompletedOnlineLevel(m_level->m_levelID)) {
                               if (this->m_level && this->m_level->isPlatformer()) {
@@ -237,7 +238,6 @@ class $modify(LevelCell) {
                               } else {
                                     rewardLabelValue->setColor({0, 150, 255});  // cyan for stars
                               }
-                              difficultySprite->addChild(rewardLabelValue);
                         }
                   }
 

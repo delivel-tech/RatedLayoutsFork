@@ -130,11 +130,15 @@ class $modify(EndLevelLayer) {
                                   success, responseStars);
 
                         if (success) {
-                              // response stars minus the difficulty reward
-                              int displayStars = responseStars - starReward;
-                              log::info("Display stars: {} - {} = {}", responseStars,
-                                        starReward, displayStars);
-                              Mod::get()->setSavedValue<int>("stars", responseStars);
+                              int responsePlanets = submitJson["planets"].asInt().unwrapOrDefault();
+                              int displayStars = isPlat ? (responsePlanets - starReward) : (responseStars - starReward);
+                              if (isPlat) {
+                                    log::info("Display planets: {} - {} = {}", responsePlanets, starReward, displayStars);
+                                    Mod::get()->setSavedValue<int>("planets", responsePlanets);
+                              } else {
+                                    log::info("Display stars: {} - {} = {}", responseStars, starReward, displayStars);
+                                    Mod::get()->setSavedValue<int>("stars", responseStars);
+                              }
 
                               // choose medium icon depending on whether the level is a platformer
                               std::string medSprite = isPlat ? "RL_planetMed.png"_spr : "RL_starMed.png"_spr;

@@ -11,7 +11,8 @@ This mod adds a new rating system that focuses on layout design and gameplay rat
 ## Features
 
 - **Layout Rating System**: Rates levels based on layout design, and fun gameplay. It doesn't focus on the decoration and more on the actual gameplay of the level!
-- **New Blueprint Stars**: Earn blueprint stars by completing classic rated layout levels!
+- **New Blueprint Stars**: Earn Blueprint stars by completing classic rated layout levels!
+- **New Planets Collectables**: Earn Planets Collectables by completing platformer rated layout levels!
 - **New Blueprint Creator Points**: Earn Blueprint Creator Points whenever you get a rated layout level!
 - **Seamless Integration**: Works alongside the existing rating system, this won't replace the current rating system but rather provide an alternative.
 - **Improved Demon Ratings**: More accurate demon ratings by introducing new difficulty value, making demons has more value depending on their actual difficulty.
@@ -28,8 +29,6 @@ This mod adds a new rating system that focuses on layout design and gameplay rat
 
 - **Custom Achievements**: Custom Achievements for completing rated layout levels and achieving milestones.
 - **Rated Layouts Demonlist**: A dedicated demonlist for rated layout demons. Grind hardest rated layout demons curated by the Rated Layouts Mod Team!
-- **Platformer Rated Layouts**: Include platformer layout levels in the Rated Layouts system.
-- **New Commet Collectable**: New collectable item called 'Commet' that can be earned by completing platformer rated layout levels.
 
 <co>**Note:** This is currently in beta and expected to have some bugs and unfinished features. Please report any issues you encounter!</c>
 
