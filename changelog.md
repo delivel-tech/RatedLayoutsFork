@@ -10,6 +10,7 @@
 - Made Blueprint Points clickable in the Profile Page to view the account's rated layout levels.
 - Layout Moderators and Admins can now suggest/rate platformer layout levels.
 - Internal Moderator and Admin UI tweaks.
+- Added additional checks on the "anti-cheat" for beating levels.
 
 # v0.2.9-beta.1
 

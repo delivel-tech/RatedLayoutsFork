@@ -93,7 +93,7 @@ class $modify(EndLevelLayer) {
                         }
                   }
 
-                  log::debug("Submitting completion with attempts: {} time: {} jumps: {}", attempts, attemptTime, jumps);
+                  log::debug("Submitting completion with attempts: {} time: {} jumps: {} clicks: {}", attempts, attemptTime, jumps, clicks);
 
                   matjson::Value jsonBody;
                   jsonBody["accountId"] = accountId;
