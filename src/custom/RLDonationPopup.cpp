@@ -63,37 +63,49 @@ bool RLDonationPopup::setup() {
       // title1
       auto heading1 = CCLabelBMFont::create("Get a Supporter Badge!", "goldFont.fnt");
       heading1->setScale(0.75f);
-      heading1->setPosition({m_mainLayer->getScaledContentSize().width / 2.f, m_mainLayer->getScaledContentSize().height - 65.f});
+      heading1->setPosition({m_mainLayer->getScaledContentSize().width / 2.f, m_mainLayer->getScaledContentSize().height - 60.f});
       m_mainLayer->addChild(heading1);
       // desc1
       auto desc1 = CCLabelBMFont::create("Get a special badge shown to\nall players and a colored comment!", "bigFont.fnt");
       desc1->setScale(0.5f);
-      desc1->setPosition({m_mainLayer->getScaledContentSize().width / 2.f, m_mainLayer->getScaledContentSize().height - 105.f});
+      desc1->setPosition({m_mainLayer->getScaledContentSize().width / 2.f, m_mainLayer->getScaledContentSize().height - 90.f});
       desc1->setAlignment(kCCTextAlignmentCenter);
       m_mainLayer->addChild(desc1);
 
       // title2
       auto heading2 = CCLabelBMFont::create("Sneak Peek on future features", "goldFont.fnt");
       heading2->setScale(0.75f);
-      heading2->setPosition({m_mainLayer->getScaledContentSize().width / 2.f, m_mainLayer->getScaledContentSize().height - 150.f});
+      heading2->setPosition({m_mainLayer->getScaledContentSize().width / 2.f, m_mainLayer->getScaledContentSize().height - 125.f});
       m_mainLayer->addChild(heading2);
       // desc2
       auto desc2 = CCLabelBMFont::create("Get exclusive sneak peeks at upcoming features\nboth in-game and on our Discord server!", "bigFont.fnt");
       desc2->setScale(0.5f);
-      desc2->setPosition({m_mainLayer->getScaledContentSize().width / 2.f, m_mainLayer->getScaledContentSize().height - 190.f});
+      desc2->setPosition({m_mainLayer->getScaledContentSize().width / 2.f, m_mainLayer->getScaledContentSize().height - 155.f});
       desc2->setAlignment(kCCTextAlignmentCenter);
       m_mainLayer->addChild(desc2);
+
+      // title3
+      auto heading3 = CCLabelBMFont::create("Priority Layout Requests", "goldFont.fnt");
+      heading3->setScale(0.75f);
+      heading3->setPosition({m_mainLayer->getScaledContentSize().width / 2.f, m_mainLayer->getScaledContentSize().height - 190.f});
+      m_mainLayer->addChild(heading3);
+      // desc3
+      auto desc3 = CCLabelBMFont::create("Request priority consideration for your layout\nsubmissions and get faster review from the team.", "bigFont.fnt");
+      desc3->setScale(0.5f);
+      desc3->setPosition({m_mainLayer->getScaledContentSize().width / 2.f, m_mainLayer->getScaledContentSize().height - 220.f});
+      desc3->setAlignment(kCCTextAlignmentCenter);
+      m_mainLayer->addChild(desc3);
 
       // open kofi link button
       auto kofiSpr = ButtonSprite::create("Donate via Ko-fi", "goldFont.fnt", "GJ_button_03.png");
       auto kofiBtn = CCMenuItemSpriteExtra::create(kofiSpr, this, menu_selector(RLDonationPopup::onClick));
-      kofiBtn->setPosition({m_mainLayer->getContentSize().width / 2.f + 90.f, 30.f});
+      kofiBtn->setPosition({m_mainLayer->getContentSize().width / 2.f + 90.f, 0.f});
       m_buttonMenu->addChild(kofiBtn);
 
       // badge request button
       auto getBadgeSpr = ButtonSprite::create("Get Badge?", "goldFont.fnt", "GJ_button_01.png");
       auto getBadgeBtn = CCMenuItemSpriteExtra::create(getBadgeSpr, this, menu_selector(RLDonationPopup::onGetBadge));
-      getBadgeBtn->setPosition({m_mainLayer->getContentSize().width / 2.f - 120.f, 30.f});
+      getBadgeBtn->setPosition({m_mainLayer->getContentSize().width / 2.f - 120.f, 0.f});
       m_buttonMenu->addChild(getBadgeBtn);
 
       // floating blocks

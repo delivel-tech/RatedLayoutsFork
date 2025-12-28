@@ -191,6 +191,14 @@ bool RLCreditsPopup::setup() {
                       for (auto& val : mods) addPlayer(val, false);
                 }
 
+                if (json.contains("supporters") && json["supporters"].isArray()) {
+                      addHeader("Layout Supporters");
+                      auto sup = json["supporters"].asArray().unwrap();
+                      for (auto& val : sup) {
+                            addPlayer(val, false);
+                      }
+                }
+
                 content->updateLayout();
                 m_scrollLayer->scrollToTop();
           });

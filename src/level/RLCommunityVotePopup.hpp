@@ -29,5 +29,11 @@ class RLCommunityVotePopup : public geode::Popup<> {
       geode::TextInput* m_gameplayInput = nullptr;
 
       CCMenuItemSpriteExtra* m_submitBtn = nullptr;
+      CCMenuItemSpriteExtra* m_toggleAllBtn = nullptr;
+      bool m_forceShowScores = false;
+      CCLabelBMFont* m_totalVotesLabel = nullptr;
+
+      void onToggleAll(CCObject* sender);
+      void onToggleScore(CCObject* sender);
       void refreshFromServer();
 };

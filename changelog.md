@@ -1,3 +1,12 @@
+# v0.3.3-beta.1
+
+- **Added Layout Supporter Badge!** Support Rated Layouts development by donating via Ko-fi and get a special badge shown to all players and a colored comment!
+- You can view the total votes count for each suggested levels in the Sent Layouts levels.
+- Scores in the Community Vote popup are now more precises.
+- Layout Moderators and Admins can now toggle the scores in the Community Vote popup even if they haven't voted yet.
+- Added **Layout Supporters** users in the credits list.
+- Minor fixes and improvements.
+
 # v0.3.2-beta.1
 
 - Removed [More Difficulties](mod:uproxide.more_difficulties) from the incompatible mods, but the more difficulties sprite won't be shown for layouts that is rated.
@@ -8,7 +17,7 @@
 - Tweaked the rating difficulty sprite positions to be more consistent.
 - Announcement button sprite changed to a more button like.
 
-*Thanks to [hiimjasmine00](https://github.com/hiimjasmine00) for the fixes!*
+_Thanks to [hiimjasmine00](https://github.com/hiimjasmine00) for the fixes!_
 
 # v0.3.1-beta.1
 

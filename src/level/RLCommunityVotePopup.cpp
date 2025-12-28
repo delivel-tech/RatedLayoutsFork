@@ -204,11 +204,28 @@ bool RLCommunityVotePopup::setup() {
       submitMenu->addChild(submitBtn);
       m_mainLayer->addChild(submitMenu, 3);
 
+      // total votes label
+      m_totalVotesLabel = CCLabelBMFont::create("Total votes: -", "goldFont.fnt");
+      m_totalVotesLabel->setPosition({m_mainLayer->getContentSize().width / 2.f, m_mainLayer->getContentSize().height - 40.f});
+      m_totalVotesLabel->setScale(0.7f);
+      m_totalVotesLabel->setAlignment(kCCTextAlignmentCenter);
+      m_mainLayer->addChild(m_totalVotesLabel, 3);
+
       // info button
       auto infoSpr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
       auto infoBtn = CCMenuItemSpriteExtra::create(infoSpr, this, menu_selector(RLCommunityVotePopup::onInfo));
       infoBtn->setPosition({25.f, 25.f});
       m_buttonMenu->addChild(infoBtn, 3);
+
+      // single toggle for moderators to show/hide all scores at once
+      int userRole2 = Mod::get()->getSavedValue<int>("role");
+      if (userRole2 == 1 || userRole2 == 2) {
+            auto allSpr = CCSprite::createWithSpriteFrameName("hideBtn_001.png");
+            allSpr->setOpacity(120);
+            m_toggleAllBtn = CCMenuItemSpriteExtra::create(allSpr, this, menu_selector(RLCommunityVotePopup::onToggleAll));
+            m_toggleAllBtn->setPosition({m_mainLayer->getScaledContentSize().width - 30.f, 25.f});
+            m_buttonMenu->addChild(m_toggleAllBtn, 3);
+      }
 
       // fetch current scores from server
       if (m_levelId > 0) {
@@ -222,9 +239,16 @@ void RLCommunityVotePopup::refreshFromServer() {
       Ref<RLCommunityVotePopup> selfRef = this;
 
       // Hide score labels until we know whether this account has voted
-      if (m_designScoreLabel) m_designScoreLabel->setVisible(false);
-      if (m_difficultyScoreLabel) m_difficultyScoreLabel->setVisible(false);
-      if (m_gameplayScoreLabel) m_gameplayScoreLabel->setVisible(false);
+      // Moderators can force-show labels via m_forceShowScores
+      if (!m_forceShowScores) {
+            if (m_designScoreLabel) m_designScoreLabel->setVisible(false);
+            if (m_difficultyScoreLabel) m_difficultyScoreLabel->setVisible(false);
+            if (m_gameplayScoreLabel) m_gameplayScoreLabel->setVisible(false);
+      } else {
+            if (m_designScoreLabel) m_designScoreLabel->setVisible(true);
+            if (m_difficultyScoreLabel) m_difficultyScoreLabel->setVisible(true);
+            if (m_gameplayScoreLabel) m_gameplayScoreLabel->setVisible(true);
+      }
 
       // First fetch aggregated scores and moderator average
       web::WebRequest().get(fmt::format("https://gdrate.arcticwoof.xyz/fetch?levelId={}", m_levelId)).listen([selfRef](web::WebResponse* res) {
@@ -240,13 +264,13 @@ void RLCommunityVotePopup::refreshFromServer() {
             }
             auto json = jres.unwrap();
             // update score labels (strings only; visibility handled by getVote)
-            int designScore = json["designScore"].asInt().unwrapOrDefault();
-            int difficultyScore = json["difficultyScore"].asInt().unwrapOrDefault();
-            int gameplayScore = json["gameplayScore"].asInt().unwrapOrDefault();
+            double designScore = json["designScore"].asDouble().unwrapOrDefault();
+            double difficultyScore = json["difficultyScore"].asDouble().unwrapOrDefault();
+            double gameplayScore = json["gameplayScore"].asDouble().unwrapOrDefault();
 
-            if (selfRef->m_designScoreLabel) selfRef->m_designScoreLabel->setString(numToString(designScore).c_str());
-            if (selfRef->m_difficultyScoreLabel) selfRef->m_difficultyScoreLabel->setString(numToString(difficultyScore).c_str());
-            if (selfRef->m_gameplayScoreLabel) selfRef->m_gameplayScoreLabel->setString(numToString(gameplayScore).c_str());
+            if (selfRef->m_designScoreLabel) selfRef->m_designScoreLabel->setString(fmt::format("{:.2f}", designScore).c_str());
+            if (selfRef->m_difficultyScoreLabel) selfRef->m_difficultyScoreLabel->setString(fmt::format("{:.2f}", difficultyScore).c_str());
+            if (selfRef->m_gameplayScoreLabel) selfRef->m_gameplayScoreLabel->setString(fmt::format("{:.2f}", gameplayScore).c_str());
 
             // moderator difficulty (read-only)
             double avg = -1.0;
@@ -296,35 +320,75 @@ void RLCommunityVotePopup::refreshFromServer() {
             bool hasGameplay = vjson["hasGameplayVoted"].asBool().unwrapOrDefault();
             bool hasDesign = vjson["hasDesignVoted"].asBool().unwrapOrDefault();
             bool hasDifficulty = vjson["hasDifficultyVoted"].asBool().unwrapOrDefault();
+            int totalVotes = vjson["totalVotes"].asInt().unwrapOrDefault();
+            if (selfRef->m_totalVotesLabel) {
+                  selfRef->m_totalVotesLabel->setString(fmt::format("Total votes: {}", totalVotes).c_str());
+            }
 
-            if (hasGameplay) {
+            // If moderators forced show, keep labels visible regardless of 'hasX' vote state
+            if (selfRef->m_forceShowScores) {
                   if (selfRef->m_gameplayInput) {
-                        selfRef->m_gameplayInput->setString("VOTED");
-                        selfRef->m_gameplayInput->setEnabled(false);
+                        // do not overwrite moderator's ability to see scores
+                        // but keep VOTED status if applicable
+                        if (hasGameplay) {
+                              selfRef->m_gameplayInput->setString("VOTED");
+                              selfRef->m_gameplayInput->setEnabled(false);
+                        }
                   }
-                  if (selfRef->m_gameplayScoreLabel) selfRef->m_gameplayScoreLabel->setVisible(true);
-            } else {
-                  if (selfRef->m_gameplayScoreLabel) selfRef->m_gameplayScoreLabel->setVisible(false);
-            }
-
-            if (hasDesign) {
                   if (selfRef->m_designInput) {
-                        selfRef->m_designInput->setString("VOTED");
-                        selfRef->m_designInput->setEnabled(false);
+                        if (hasDesign) {
+                              selfRef->m_designInput->setString("VOTED");
+                              selfRef->m_designInput->setEnabled(false);
+                        }
                   }
-                  if (selfRef->m_designScoreLabel) selfRef->m_designScoreLabel->setVisible(true);
-            } else {
-                  if (selfRef->m_designScoreLabel) selfRef->m_designScoreLabel->setVisible(false);
-            }
-
-            if (hasDifficulty) {
                   if (selfRef->m_difficultyInput) {
-                        selfRef->m_difficultyInput->setString("VOTED");
-                        selfRef->m_difficultyInput->setEnabled(false);
+                        if (hasDifficulty) {
+                              selfRef->m_difficultyInput->setString("VOTED");
+                              selfRef->m_difficultyInput->setEnabled(false);
+                        }
                   }
+
+                  if (selfRef->m_gameplayScoreLabel) selfRef->m_gameplayScoreLabel->setVisible(true);
+                  if (selfRef->m_designScoreLabel) selfRef->m_designScoreLabel->setVisible(true);
                   if (selfRef->m_difficultyScoreLabel) selfRef->m_difficultyScoreLabel->setVisible(true);
             } else {
-                  if (selfRef->m_difficultyScoreLabel) selfRef->m_difficultyScoreLabel->setVisible(false);
+                  if (hasGameplay) {
+                        if (selfRef->m_gameplayInput) {
+                              selfRef->m_gameplayInput->setString("VOTED");
+                              selfRef->m_gameplayInput->setEnabled(false);
+                        }
+                        if (selfRef->m_gameplayScoreLabel) selfRef->m_gameplayScoreLabel->setVisible(true);
+                  } else {
+                        if (selfRef->m_gameplayScoreLabel) selfRef->m_gameplayScoreLabel->setVisible(false);
+                  }
+
+                  if (hasDesign) {
+                        if (selfRef->m_designInput) {
+                              selfRef->m_designInput->setString("VOTED");
+                              selfRef->m_designInput->setEnabled(false);
+                        }
+                        if (selfRef->m_designScoreLabel) selfRef->m_designScoreLabel->setVisible(true);
+                  } else {
+                        if (selfRef->m_designScoreLabel) selfRef->m_designScoreLabel->setVisible(false);
+                  }
+
+                  if (hasDifficulty) {
+                        if (selfRef->m_difficultyInput) {
+                              selfRef->m_difficultyInput->setString("VOTED");
+                              selfRef->m_difficultyInput->setEnabled(false);
+                        }
+                        if (selfRef->m_difficultyScoreLabel) selfRef->m_difficultyScoreLabel->setVisible(true);
+                  } else {
+                        if (selfRef->m_difficultyScoreLabel) selfRef->m_difficultyScoreLabel->setVisible(false);
+                  }
+            }
+
+            // Ensure toggle buttons reflect current visibility state for moderators
+            int userRole = Mod::get()->getSavedValue<int>("role");
+            if (userRole == 1 || userRole == 2) {
+                  if (selfRef->m_toggleAllBtn) selfRef->m_toggleAllBtn->setVisible(true);
+            } else {
+                  if (selfRef->m_toggleAllBtn) selfRef->m_toggleAllBtn->setVisible(false);
             }
 
             // If all three categories have already been voted on, disable submit
@@ -339,6 +403,9 @@ void RLCommunityVotePopup::refreshFromServer() {
                         selfRef->m_submitBtn->setNormalImage(ButtonSprite::create("Submit", "goldFont.fnt", "GJ_button_01.png"));
                   }
             }
+
+            // When moderators toggle, their actions should not be blocked by 'already voted' state
+            if (selfRef->m_toggleAllBtn) selfRef->m_toggleAllBtn->setEnabled(true);
       });
 }
 
@@ -356,4 +423,33 @@ void RLCommunityVotePopup::onInfo(CCObject*) {
           "Please rate suggested layouts <cg>honestly and fairly</c> based on your experience playing them!",
           "OK")
           ->show();
+}
+
+void RLCommunityVotePopup::onToggleScore(CCObject* sender) {
+      // kept for backward-compat; individual toggles no longer exist
+}
+
+void RLCommunityVotePopup::onToggleAll(CCObject* sender) {
+      // toggle visibility for all three score labels
+      if (!m_designScoreLabel || !m_difficultyScoreLabel || !m_gameplayScoreLabel) return;
+
+      bool anyVisible = m_designScoreLabel->isVisible() || m_difficultyScoreLabel->isVisible() || m_gameplayScoreLabel->isVisible();
+      bool newVis = !anyVisible;
+      m_forceShowScores = newVis;
+
+      m_designScoreLabel->setVisible(newVis);
+      m_difficultyScoreLabel->setVisible(newVis);
+      m_gameplayScoreLabel->setVisible(newVis);
+
+      // update toggle visual state if possible
+      if (m_toggleAllBtn) {
+            auto normal = m_toggleAllBtn->getNormalImage();
+            auto spr = dynamic_cast<CCSprite*>(normal);
+            if (spr) spr->setOpacity(newVis ? 255 : 120);
+      }
+
+      if (newVis) {
+            // refresh scores when showing
+            refreshFromServer();
+      }
 }
