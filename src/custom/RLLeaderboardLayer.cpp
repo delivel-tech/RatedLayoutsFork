@@ -81,7 +81,7 @@ bool RLLeaderboardLayer::init() {
       typeMenu->setPosition({0, 0});
 
       auto starsTab = TabButton::create(
-          "Top Stars", this,
+          "Top Sparks", this,
           menu_selector(RLLeaderboardLayer::onLeaderboardTypeButton));
       starsTab->setTag(1);
       starsTab->toggle(true);
@@ -106,6 +106,13 @@ bool RLLeaderboardLayer::init() {
       creatorTab->setPosition({winSize.width / 2 + 120, winSize.height - 27});
       typeMenu->addChild(creatorTab);
       m_creatorTab = creatorTab;
+
+      if (Mod::get()->getSettingValue<bool>("disableCreatorPoints") == true) {
+            if (m_creatorTab) {
+                  m_creatorTab->setEnabled(false);
+                  m_creatorTab->setVisible(false);
+            }
+      }
 
       this->addChild(typeMenu);
       this->fetchLeaderboard(1, 100);

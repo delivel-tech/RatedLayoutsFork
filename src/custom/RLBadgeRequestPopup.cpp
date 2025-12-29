@@ -4,7 +4,7 @@ using namespace geode::prelude;
 
 RLBadgeRequestPopup* RLBadgeRequestPopup::create() {
       auto ret = new RLBadgeRequestPopup();
-      if (ret && ret->initAnchored(420.f, 160.f, "GJ_square04.png")) {
+      if (ret && ret->initAnchored(420.f, 200.f, "GJ_square04.png")) {
             ret->autorelease();
             return ret;
       }
@@ -13,28 +13,28 @@ RLBadgeRequestPopup* RLBadgeRequestPopup::create() {
 }
 
 bool RLBadgeRequestPopup::setup() {
-      setTitle("Request Layout Supporter Badge");
+      setTitle("Claim Layout Supporter Badge");
 
       auto cs = m_mainLayer->getContentSize();
 
-      m_discordInput = TextInput::create(320.f, "Discord Username");
+      m_discordInput = TextInput::create(370.f, "Discord Username");
       m_discordInput->setCommonFilter(CommonFilter::Any);
       m_discordInput->setPosition({cs.width / 2.f, cs.height - 50.f});
       m_mainLayer->addChild(m_discordInput);
 
       // info text
       auto infoText = MDTextArea::create(
-          "Enter your <co>Discord username</c> that is linked to your <cp>Ko-fi account</c> to receieve a <cp>Layout Supporter Badge</c>.\n\n"
-          "Make sure that you have <cg>linked</c> your <cb>Discord Account</c> through <cp>Ko-fi.</c>\n\n"
+          "Enter your <co>Discord Username (not display name)</c> that is linked to your <cp>Ko-fi account</c> to receieve a <cp>Layout Supporter Badge</c>.\n\n"
+          "Make sure that you have already <cg>linked</c> your <cb>Discord Account</c> through <cp>Ko-fi.</c> beforehand!\n\n"
           "### If you encounter any <cr>issue</c> during this process, please contact <cf>ArcticWoof</c> on <cb>Discord</c>.",
-          {cs.width - 40.f, 60.f});
-      infoText->setPosition({cs.width / 2.f, cs.height - 100.f});
+          {cs.width - 40.f, 100.f});
+      infoText->setPosition({cs.width / 2.f, cs.height - 120.f});
       infoText->setAnchorPoint({0.5f, 0.5f});
       infoText->setID("rl-badge-request-info");
       m_mainLayer->addChild(infoText);
 
-      // submit button
-      auto submitSpr = ButtonSprite::create("Submit", "goldFont.fnt", "GJ_button_01.png");
+      // claim button
+      auto submitSpr = ButtonSprite::create("Claim", "goldFont.fnt", "GJ_button_01.png");
       auto submitBtn = CCMenuItemSpriteExtra::create(submitSpr, this, menu_selector(RLBadgeRequestPopup::onSubmit));
       submitBtn->setPosition({cs.width / 2.f, 0.f});
       m_buttonMenu->addChild(submitBtn);

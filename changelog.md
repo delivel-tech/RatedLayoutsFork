@@ -1,3 +1,8 @@
+# v0.3.4-beta.1
+
+- Added Disable Creator Points in mod settings. This is for specific users who see it as a negative aspect of the mod.
+- Minor fixes and improvements.
+
 # v0.3.3-beta.1
 
 - **Added Layout Supporter Badge!** Support Rated Layouts development by donating via Ko-fi and get a special badge shown to all players and a colored comment!

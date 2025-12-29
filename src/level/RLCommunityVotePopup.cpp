@@ -444,7 +444,7 @@ void RLCommunityVotePopup::onToggleAll(CCObject* sender) {
       // update toggle visual state if possible
       if (m_toggleAllBtn) {
             auto normal = m_toggleAllBtn->getNormalImage();
-            auto spr = dynamic_cast<CCSprite*>(normal);
+            auto spr = static_cast<CCSprite*>(normal);
             if (spr) spr->setOpacity(newVis ? 255 : 120);
       }
 

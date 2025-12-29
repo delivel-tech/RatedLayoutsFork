@@ -320,7 +320,8 @@ class $modify(RLProfilePage, ProfilePage) {
 
                   pageRef->m_fields->planetsCount = planetsCount;
 
-                  if (points > 0) {
+                  bool disableCreatorPoints = Mod::get()->getSettingValue<bool>("disableCreatorPoints");
+                  if (!disableCreatorPoints && points > 0) {
                         auto layoutPointsCount =
                             CCLabelBMFont::create(numToString(GameToolbox::pointsToString(points)).c_str(), "bigFont.fnt");
                         layoutPointsCount->setID("label");

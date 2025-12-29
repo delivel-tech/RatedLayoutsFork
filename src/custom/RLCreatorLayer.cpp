@@ -213,7 +213,7 @@ bool RLCreatorLayer::init() {
       supportButtonSpr->setScale(1.5f);
       auto supportButton = CCMenuItemSpriteExtra::create(
           supportButtonSpr, this, menu_selector(RLCreatorLayer::onSupporterButton));
-      supportButton->setPosition({creditButton->getPositionX() - 40, creditButton->getPositionY()});
+      supportButton->setPosition({creditButton->getPositionX(), creditButton->getPositionY() + 40});
       infoMenu->addChild(supportButton);
 
       // button
@@ -222,7 +222,7 @@ bool RLCreatorLayer::init() {
             addDiagloueBtnSpr->setOpacity(100);
             auto addDialogueBtn = CCMenuItemSpriteExtra::create(
                 addDiagloueBtnSpr, this, menu_selector(RLCreatorLayer::onSecretDialogueButton));
-            addDialogueBtn->setPosition({creditButton->getPositionX(), creditButton->getPositionY() + 40});
+            addDialogueBtn->setPosition({creditButton->getPositionX(), creditButton->getPositionY() + 80});
             infoMenu->addChild(addDialogueBtn);
       }
 
